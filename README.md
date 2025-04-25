@@ -1,5 +1,5 @@
 # JMT-Report-Generator
-📊 JMT Report Generator – Excel Report Tools - by Aniruddha Dey, DPA - Coochbehar
+📊 JMT Report Generator – Excel Report Tools - by Aniruddha Dey, DPA - Coochbehar with the help of AI
 
 > ⚠️ Disclaimer: These scripts are designed specifically for Excel files exported from the JMT Portal via  
 Report > Application List (Birth)
