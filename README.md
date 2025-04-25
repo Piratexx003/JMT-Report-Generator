@@ -42,19 +42,19 @@ Generates interactive visual dashboards using processed birth application data. 
     7. Mother's ID Proof  
     8. Present Address – District  
     9. Present Address – Block/Municipality  
-   10. Permanent Address – District  
-   11. Permanent Address – Block/Municipality  
-   12. Religion  
-   13. Father's Education  
-   14. Father's Occupation  
-   15. Mother's Education  
-   16. Mother's Occupation  
-   17. Application Status  
-   18. Application Type  
-   19. Type of Attention at Delivery  
-   20. Delivery Method  
-   21. Entered By (Role)  
-   22. Birth Weight Distribution  
+    10. Permanent Address – District  
+    11. Permanent Address – Block/Municipality  
+    12. Religion  
+    13. Father's Education  
+    14. Father's Occupation  
+    15. Mother's Education  
+    16. Mother's Occupation  
+    17. Application Status  
+    18. Application Type  
+    19. Type of Attention at Delivery  
+    20. Delivery Method  
+    21. Entered By (Role)  
+    22. Birth Weight Distribution  
 
 ![image](https://github.com/user-attachments/assets/74c3f0ff-1794-428d-b0e0-9d5d24ca9aeb)
 
@@ -69,16 +69,16 @@ Generates dynamic dashboard reports for death application data. Key insights inc
     7. Place of Death  
     8. District-wise Applications  
     9. Urban vs Rural Report  
-   10. Block/Municipality-wise Report  
-   11. Entered By (Role)  
-   12. Entered By Institution  
-   13. Top 10 Immediate Causes of Death  
-   14. ID Proof Submitted  
-   15. Occupation of Deceased  
-   16. Application Status Distribution  
-   17. Missing First Name Count  
-   18. Missing ID Proof Count  
-   19. Manner of Death  
+    10. Block/Municipality-wise Report  
+    11. Entered By (Role)  
+    12. Entered By Institution  
+    13. Top 10 Immediate Causes of Death  
+    14. ID Proof Submitted  
+    15. Occupation of Deceased  
+    16. Application Status Distribution  
+    17. Missing First Name Count  
+    18. Missing ID Proof Count  
+    19. Manner of Death  
 
 ![image](https://github.com/user-attachments/assets/722fdf9a-47aa-4ee2-bc0a-1e49b4558c04)
 
