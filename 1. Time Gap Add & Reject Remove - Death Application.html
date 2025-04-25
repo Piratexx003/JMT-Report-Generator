@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Gap Add & Reject Remove - Death Application</title>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- XLSX and FileSaver libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <!-- Styles -->
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --danger-color: #f72585;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--success-color));
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            padding: 25px 20px 15px;
+            font-weight: 600;
+            position: relative;
+        }
+        
+        h1::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--accent-color);
+            margin: 10px auto;
+            border-radius: 2px;
+        }
+        
+        h2 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .upload-section {
+            margin: 20px;
+            padding: 30px;
+            border: 2px dashed #ccc;
+            border-radius: var(--border-radius);
+            text-align: center;
+            transition: var(--transition);
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .upload-section:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(72, 149, 239, 0.05);
+        }
+        
+        .upload-section.active {
+            border-color: var(--primary-color);
+            background-color: rgba(72, 149, 239, 0.1);
+        }
+        
+        .results {
+            margin: 20px;
+            padding: 25px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: none;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            margin-top: 15px;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .file-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 25px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        .file-label:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .year-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .year-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .file-section {
+            margin-top: 30px;
+            border-top: 2px solid #eee;
+            padding-top: 25px;
+        }
+        
+        .stats-category {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .stats-category h4 {
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .stats-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-count {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .drag-text {
+            margin: 15px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 15px auto;
+            }
+            
+            h1 {
+                font-size: 24px;
+                padding: 20px 15px 10px;
+            }
+            
+            .upload-section {
+                padding: 20px;
+                margin: 15px;
+            }
+            
+            .results {
+                padding: 20px;
+                margin: 15px;
+            }
+            
+            button, .file-label {
+                padding: 10px 20px;
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                margin: 10px auto;
+            }
+            
+            h1 {
+                font-size: 22px;
+            }
+            
+            .upload-section {
+                padding: 15px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>
+        <i class="fas fa-book-dead"></i> Time Gap Add & Reject Remove - Death Application
+    </h1>
+
+    <div class="upload-section" id="uploadSection">
+        <label for="fileInput" class="file-label">
+            <i class="fas fa-upload"></i> Choose Excel Files
+        </label>
+        <input type="file" id="fileInput" accept=".xlsx" multiple />
+        <div class="drag-text">
+            <i class="fas fa-arrow-down"></i> or drag and drop files here
+        </div>
+        <div class="file-count" id="fileCount">No files selected</div>
+        <button id="processBtn" disabled>
+            <i class="fas fa-cogs"></i> Process Files
+        </button>
+    </div>
+
+    <div id="results" class="results">
+        <h2><i class="fas fa-chart-bar"></i> Death Statistics</h2>
+        <div id="statsOutput"></div>
+        <button id="downloadBtn">
+            <i class="fas fa-download"></i> Download Processed Files
+        </button>
+    </div>
+</div>
+
+<script>
+    let filesMap = new Map(); // Map to store original file names and their workbooks
+    let processedMap = new Map(); // Map for processed workbooks
+    let statsMap = new Map(); // Map to store death stats per file
+
+    const fileInput = document.getElementById('fileInput');
+    const processBtn = document.getElementById('processBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const statsOutput = document.getElementById('statsOutput');
+    const resultsSection = document.getElementById('results');
+    const uploadSection = document.getElementById('uploadSection');
+    const fileCountElement = document.getElementById('fileCount');
+
+    fileInput.addEventListener('change', function(e) {
+        if (fileInput.files.length > 0) {
+            filesMap.clear();
+            fileCountElement.textContent = `${fileInput.files.length} file(s) selected`;
+            fileCountElement.style.color = "var(--primary-color)";
+            fileCountElement.innerHTML = `<i class="fas fa-check-circle"></i> ${fileInput.files.length} file(s) selected`;
+            
+            let filesProcessed = 0;
+            for (const file of fileInput.files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const wb = XLSX.read(data, { type: 'array' });
+                    filesMap.set(file.name, wb);
+                    filesProcessed++;
+                    
+                    if (filesProcessed === fileInput.files.length) {
+                        processBtn.disabled = false;
+                        uploadSection.classList.add('active');
+                    }
+                };
+                reader.onerror = function() {
+                    filesProcessed++;
+                    if (filesProcessed === fileInput.files.length) {
+                        processBtn.disabled = filesMap.size === 0;
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        } else {
+            fileCountElement.textContent = 'No files selected';
+            fileCountElement.style.color = "#666";
+            uploadSection.classList.remove('active');
+        }
+    });
+
+    uploadSection.addEventListener('dragover', e => {
+        e.preventDefault();
+        uploadSection.classList.add('active');
+    });
+    
+    uploadSection.addEventListener('dragleave', () => {
+        if (!fileInput.files || fileInput.files.length === 0) {
+            uploadSection.classList.remove('active');
+        }
+    });
+    
+    uploadSection.addEventListener('drop', e => {
+        e.preventDefault();
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            const event = new Event('change');
+            fileInput.dispatchEvent(event);
+        }
+        uploadSection.classList.remove('active');
+    });
+
+    processBtn.addEventListener('click', () => {
+        processBtn.disabled = true;
+        processBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
+        
+        setTimeout(() => {
+            processedMap.clear();
+            statsMap.clear();
+            filesMap.forEach((workbook, fileName) => {
+                const result = processFile(workbook);
+                processedMap.set(fileName, result.processedWorkbook);
+                statsMap.set(fileName, result.deathStats);
+            });
+            
+            displayStatistics();
+            resultsSection.style.display = 'block';
+            processBtn.innerHTML = `<i class="fas fa-cogs"></i> Process Files`;
+            processBtn.disabled = false;
+            
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    });
+
+    downloadBtn.addEventListener('click', () => {
+        downloadBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Downloading...`;
+        
+        setTimeout(() => {
+            processedMap.forEach((workbook, fileName) => {
+                const baseName = fileName.replace(/\.xlsx$/i, '');
+                XLSX.writeFile(workbook, `${baseName}_processed.xlsx`);
+            });
+            
+            downloadBtn.innerHTML = `<i class="fas fa-download"></i> Download Processed Files`;
+            
+            // Show download complete message
+            const downloadComplete = document.createElement('div');
+            downloadComplete.className = 'file-count';
+            downloadComplete.innerHTML = `<i class="fas fa-check-circle"></i> Download complete!`;
+            downloadComplete.style.color = "var(--success-color)";
+            downloadComplete.style.marginTop = "15px";
+            downloadBtn.insertAdjacentElement('afterend', downloadComplete);
+            
+            setTimeout(() => {
+                downloadComplete.remove();
+            }, 3000);
+        }, 100);
+    });
+
+    function processFile(workbook) {
+        const deathStats = {};
+        let processedWorkbook = null;
+
+        workbook.SheetNames.forEach(sheetName => {
+            const worksheet = workbook.Sheets[sheetName];
+            let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            if (jsonData.length === 0) return;
+
+            const headerRow = jsonData[0];
+            const columnDIndex = headerRow.indexOf('Date Of Death');
+
+            if (columnDIndex !== -1) {
+                for (let i = 1; i < jsonData.length; i++) {
+                    let dateValue = jsonData[i][columnDIndex];
+                    let dateObj = null;
+
+                    if (typeof dateValue === 'number') {
+                        const date = XLSX.SSF.parse_date_code(dateValue);
+                        dateObj = new Date(date.y, date.m - 1, date.d);
+                    } else if (typeof dateValue === 'string') {
+                        const formats = [
+                            { regex: /(\d{2})\/(\d{2})\/(\d{4})/, parts: [1, 2, 3] },
+                            { regex: /(\d{2})-(\d{2})-(\d{4})/, parts: [1, 2, 3] },
+                            { regex: /(\d{4})-(\d{2})-(\d{2})/, parts: [3, 2, 1] }
+                        ];
+                        for (const format of formats) {
+                            const match = dateValue.match(format.regex);
+                            if (match) {
+                                const day = parseInt(match[format.parts[0]], 10);
+                                const month = parseInt(match[format.parts[1]], 10);
+                                const year = parseInt(match[format.parts[2]], 10);
+                                dateObj = new Date(year, month - 1, day);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (dateObj instanceof Date && !isNaN(dateObj)) {
+                        const day = String(dateObj.getDate()).padStart(2, '0');
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const year = dateObj.getFullYear();
+                        jsonData[i][columnDIndex] = `${day}/${month}/${year}`;
+                    }
+                }
+
+                jsonData.sort((a, b) => {
+                    const dateA = parseDateString(a[columnDIndex]);
+                    const dateB = parseDateString(b[columnDIndex]);
+                    return dateA - dateB;
+                });
+
+                headerRow.splice(columnDIndex + 1, 0, 'Time Gap');
+                for (let i = 1; i < jsonData.length; i++) {
+                    jsonData[i].splice(columnDIndex + 1, 0, '');
+                    const reportingDateStr = jsonData[i][0];
+                    const dodStr = jsonData[i][columnDIndex];
+                    const reportingDate = parseDateString(reportingDateStr);
+                    const dod = parseDateString(dodStr);
+                    if (!isNaN(reportingDate) && !isNaN(dod)) {
+                        const diffInDays = Math.floor((reportingDate - dod) / (1000 * 60 * 60 * 24));
+                        jsonData[i][columnDIndex + 1] = diffInDays;
+                    }
+                }
+            }
+
+            const roleIndex = headerRow.indexOf('Data Entered by (Role)');
+            const statusIndex = headerRow.indexOf('Status');
+            if (roleIndex !== -1 && statusIndex !== -1) {
+                for (let i = jsonData.length - 1; i >= 1; i--) {
+                    const role = jsonData[i][roleIndex];
+                    const status = jsonData[i][statusIndex];
+                    if (status === 'Application Submitted' || status === 'Rejected') {
+                        jsonData.splice(i, 1);
+                    }
+                }
+                const rejectedRoles = ['GovtHospitalDEO', 'PvtHospitalDEO', 'PanchayatDEO', 'UlbDEO'];
+                for (let i = jsonData.length - 1; i >= 1; i--) {
+                    const role = jsonData[i][roleIndex];
+                    const status = jsonData[i][statusIndex];
+                    if (rejectedRoles.includes(role) && status === 'Rejected') {
+                        jsonData.splice(i, 1);
+                    }
+                }
+            }
+
+            const placeOfDeathIndex = headerRow.indexOf('Place of Death');
+            const descPlaceOfDeathIndex = headerRow.indexOf('Description of Place of death');
+            if (placeOfDeathIndex !== -1 && descPlaceOfDeathIndex !== -1 && columnDIndex !== -1) {
+                for (let i = 1; i < jsonData.length; i++) {
+                    const place = (jsonData[i][placeOfDeathIndex] || '').toLowerCase().trim();
+                    const desc = (jsonData[i][descPlaceOfDeathIndex] || '').trim();
+                    const dod = jsonData[i][columnDIndex];
+                    let year = 'Unknown';
+                    if (dod) {
+                        const yearMatch = dod.match(/\d{2}\/\d{2}\/(\d{4})/);
+                        if (yearMatch) year = yearMatch[1];
+                    }
+                    if (!deathStats[year]) deathStats[year] = {};
+                    const statsYear = deathStats[year];
+                    if (place === 'hospital') {
+                        statsYear.hospitalPlaceCounts = statsYear.hospitalPlaceCounts || {};
+                        statsYear.hospitalPlaceCounts[desc] = (statsYear.hospitalPlaceCounts[desc] || 0) + 1;
+                    } else if (['home', 'house', 'home death'].includes(place)) {
+                        statsYear.homePlaceCounts = statsYear.homePlaceCounts || {};
+                        statsYear.homePlaceCounts[desc] = (statsYear.homePlaceCounts[desc] || 0) + 1;
+                    }
+                }
+            }
+
+            const newWorksheet = XLSX.utils.aoa_to_sheet(jsonData);
+            processedWorkbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(processedWorkbook, newWorksheet, sheetName);
+        });
+
+        return { processedWorkbook, deathStats };
+    }
+
+    function parseDateString(dateStr) {
+        if (!dateStr) return new Date(0);
+        const match = dateStr.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        if (match) {
+            const day = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10);
+            const year = parseInt(match[3], 10);
+            return new Date(year, month - 1, day);
+        }
+        return new Date(0);
+    }
+
+    function displayStatistics() {
+        statsOutput.innerHTML = '';
+        
+        if (statsMap.size === 0) {
+            statsOutput.innerHTML = '<p>No statistics data available.</p>';
+            return;
+        }
+        
+        statsMap.forEach((deathStats, fileName) => {
+            const fileDiv = document.createElement('div');
+            fileDiv.className = 'file-section';
+            
+            const fileTitle = document.createElement('h3');
+            fileTitle.innerHTML = `<i class="fas fa-file-excel"></i> ${fileName}`;
+            fileDiv.appendChild(fileTitle);
+
+            const sortedYears = Object.keys(deathStats).sort((a, b) => b - a);
+            
+            if (sortedYears.length === 0) {
+                const noData = document.createElement('p');
+                noData.textContent = 'No death statistics data found in this file.';
+                fileDiv.appendChild(noData);
+            } else {
+                for (const year of sortedYears) {
+                    const yearDiv = document.createElement('div');
+                    yearDiv.className = 'year-section';
+                    
+                    const yearTitle = document.createElement('div');
+                    yearTitle.className = 'year-title';
+                    yearTitle.innerHTML = `<i class="fas fa-calendar-alt"></i> ${year}`;
+                    yearDiv.appendChild(yearTitle);
+
+                    const stats = deathStats[year];
+
+                    if (stats.hospitalPlaceCounts) {
+                        const hospitalDiv = document.createElement('div');
+                        hospitalDiv.className = 'stats-category';
+                        
+                        const hospitalTitle = document.createElement('h4');
+                        hospitalTitle.innerHTML = `<i class="fas fa-hospital"></i> Hospital - Description of Place of Death`;
+                        hospitalDiv.appendChild(hospitalTitle);
+                        
+                        for (const [desc, count] of Object.entries(stats.hospitalPlaceCounts)) {
+                            const itemDiv = document.createElement('div');
+                            itemDiv.className = 'stats-item';
+                            
+                            const descSpan = document.createElement('span');
+                            descSpan.textContent = desc;
+                            
+                            const countSpan = document.createElement('span');
+                            countSpan.textContent = count;
+                            countSpan.style.fontWeight = '500';
+                            countSpan.style.color = 'var(--primary-color)';
+                            
+                            itemDiv.appendChild(descSpan);
+                            itemDiv.appendChild(countSpan);
+                            hospitalDiv.appendChild(itemDiv);
+                        }
+                        
+                        yearDiv.appendChild(hospitalDiv);
+                    }
+
+                    if (stats.homePlaceCounts) {
+                        const homeDiv = document.createElement('div');
+                        homeDiv.className = 'stats-category';
+                        
+                        const homeTitle = document.createElement('h4');
+                        homeTitle.innerHTML = `<i class="fas fa-home"></i> Home - Description of Place of Death`;
+                        homeDiv.appendChild(homeTitle);
+                        
+                        for (const [desc, count] of Object.entries(stats.homePlaceCounts)) {
+                            const itemDiv = document.createElement('div');
+                            itemDiv.className = 'stats-item';
+                            
+                            const descSpan = document.createElement('span');
+                            descSpan.textContent = desc;
+                            
+                            const countSpan = document.createElement('span');
+                            countSpan.textContent = count;
+                            countSpan.style.fontWeight = '500';
+                            countSpan.style.color = 'var(--accent-color)';
+                            
+                            itemDiv.appendChild(descSpan);
+                            itemDiv.appendChild(countSpan);
+                            homeDiv.appendChild(itemDiv);
+                        }
+                        
+                        yearDiv.appendChild(homeDiv);
+                    }
+
+                    fileDiv.appendChild(yearDiv);
+                }
+            }
+
+            statsOutput.appendChild(fileDiv);
+        });
+    }
+</script>
+</body>
+</html>

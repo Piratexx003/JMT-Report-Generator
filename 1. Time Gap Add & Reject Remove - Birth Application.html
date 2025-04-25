@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Gap Add & Reject Remove - Birth Application</title>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- XLSX and FileSaver libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <!-- Styles -->
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cae;
+            --accent-color: #ff7e5f;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #28a745;
+            --info-color: #17a2b8;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            padding: 25px 20px 15px;
+            font-weight: 600;
+            position: relative;
+        }
+        
+        h1::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--accent-color);
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 500;
+            position: relative;
+            padding-bottom: 8px;
+        }
+        
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 3px;
+        }
+        
+        h3 {
+            color: var(--secondary-color);
+            margin: 15px 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        
+        h3 i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .upload-section {
+            text-align: center;
+            padding: 30px 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .upload-section.active {
+            border-color: var(--accent-color);
+            background-color: rgba(255, 126, 95, 0.05);
+        }
+        
+        .file-label {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 25px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(74, 111, 165, 0.2);
+        }
+        
+        .file-label:hover {
+            background-color: #3a5a8f;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(74, 111, 165, 0.3);
+        }
+        
+        .file-label i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .upload-instruction {
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .upload-instruction i {
+            margin: 0 8px;
+            color: var(--accent-color);
+        }
+        
+        .file-count {
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(74, 111, 165, 0.2);
+        }
+        
+        button:hover {
+            background-color: #3a5a8f;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(74, 111, 165, 0.3);
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        .results {
+            padding: 25px;
+            display: none;
+        }
+        
+        .stats-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .file-section {
+            margin-bottom: 30px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .year-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid var(--secondary-color);
+        }
+        
+        .year-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        .year-title i {
+            margin-right: 8px;
+            color: var(--accent-color);
+        }
+        
+        .stat-item {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-item i {
+            margin-right: 10px;
+            color: var(--secondary-color);
+            width: 20px;
+            text-align: center;
+        }
+        
+        .place-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .place-title {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        .place-title i {
+            margin-right: 8px;
+            color: var(--accent-color);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            h1 {
+                font-size: 24px;
+                padding: 20px 15px 10px;
+            }
+            
+            .upload-section {
+                padding: 20px 15px;
+            }
+            
+            .file-label, button {
+                width: 100%;
+                padding: 12px 15px;
+            }
+            
+            .results {
+                padding: 15px;
+            }
+        }
+        
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>
+        <i class="fas fa-baby"></i> Time Gap Add & Reject Remove - Birth Application
+    </h1>
+
+    <div class="upload-section" id="uploadSection">
+        <label for="fileInput" class="file-label">
+            <i class="fas fa-file-excel"></i> Choose Excel Files
+            <span id="fileCount" class="file-count" style="display: none;"></span>
+        </label>
+        <input type="file" id="fileInput" accept=".xlsx" multiple />
+        <div class="upload-instruction">
+            <span>or</span>
+            <i class="fas fa-arrow-down"></i>
+            <span>drag and drop files here</span>
+        </div>
+        <button id="processBtn" disabled>
+            <i class="fas fa-cogs"></i> Process Files
+        </button>
+    </div>
+
+    <div id="results" class="results">
+        <div class="stats-container">
+            <h2><i class="fas fa-chart-bar"></i> Birth Statistics</h2>
+            <div id="statsOutput"></div>
+        </div>
+        <button id="downloadBtn">
+            <i class="fas fa-download"></i> Download Processed Files
+        </button>
+    </div>
+</div>
+
+<script>
+    let filesMap = new Map(); // Map to store original file names and their workbooks
+    let processedMap = new Map(); // Map for processed workbooks
+    let statsMap = new Map(); // Map to store birth stats per file
+
+    const fileInput = document.getElementById('fileInput');
+    const processBtn = document.getElementById('processBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const statsOutput = document.getElementById('statsOutput');
+    const resultsSection = document.getElementById('results');
+    const uploadSection = document.getElementById('uploadSection');
+    const fileCountElement = document.getElementById('fileCount');
+
+    fileInput.addEventListener('change', function(e) {
+        if (fileInput.files.length > 0) {
+            filesMap.clear();
+            fileCountElement.textContent = fileInput.files.length;
+            fileCountElement.style.display = 'inline-flex';
+            
+            // Show loading state
+            processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Files...';
+            processBtn.disabled = true;
+            
+            let filesLoaded = 0;
+            
+            for (const file of fileInput.files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const wb = XLSX.read(data, { type: 'array' });
+                    filesMap.set(file.name, wb);
+                    filesLoaded++;
+                    
+                    if (filesLoaded === fileInput.files.length) {
+                        processBtn.innerHTML = '<i class="fas fa-cogs"></i> Process Files';
+                        processBtn.disabled = false;
+                        uploadSection.classList.add('active');
+                    }
+                };
+                reader.onerror = function() {
+                    filesLoaded++;
+                    if (filesLoaded === fileInput.files.length) {
+                        processBtn.innerHTML = '<i class="fas fa-cogs"></i> Process Files';
+                        if (filesMap.size > 0) {
+                            processBtn.disabled = false;
+                        }
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        } else {
+            fileCountElement.style.display = 'none';
+            uploadSection.classList.remove('active');
+        }
+    });
+
+    uploadSection.addEventListener('dragover', e => {
+        e.preventDefault();
+        uploadSection.classList.add('active');
+    });
+    
+    uploadSection.addEventListener('dragleave', () => {
+        if (!fileInput.files || fileInput.files.length === 0) {
+            uploadSection.classList.remove('active');
+        }
+    });
+    
+    uploadSection.addEventListener('drop', e => {
+        e.preventDefault();
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            const event = new Event('change');
+            fileInput.dispatchEvent(event);
+        }
+    });
+
+    processBtn.addEventListener('click', async () => {
+        if (filesMap.size === 0) return;
+        
+        // Show processing state
+        processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        processBtn.disabled = true;
+        
+        // Process files with a small delay to allow UI update
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        processedMap.clear();
+        statsMap.clear();
+        
+        filesMap.forEach((workbook, fileName) => {
+            const result = processFile(workbook);
+            processedMap.set(fileName, result.processedWorkbook);
+            statsMap.set(fileName, result.birthStats);
+        });
+        
+        displayStatistics();
+        resultsSection.style.display = 'block';
+        
+        // Reset button state
+        processBtn.innerHTML = '<i class="fas fa-cogs"></i> Process Files';
+        processBtn.disabled = false;
+        
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    downloadBtn.addEventListener('click', () => {
+        if (processedMap.size === 0) return;
+        
+        // Show downloading state
+        downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+        downloadBtn.disabled = true;
+        
+        let filesDownloaded = 0;
+        processedMap.forEach((workbook, fileName) => {
+            const baseName = fileName.replace(/\.xlsx$/i, '');
+            XLSX.writeFile(workbook, `${baseName}_processed.xlsx`);
+            filesDownloaded++;
+            
+            if (filesDownloaded === processedMap.size) {
+                // Reset button state after all downloads
+                setTimeout(() => {
+                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Processed Files';
+                    downloadBtn.disabled = false;
+                }, 500);
+            }
+        });
+    });
+
+    function processFile(workbook) {
+        const birthStats = {};
+        let processedWorkbook = null;
+
+        workbook.SheetNames.forEach(sheetName => {
+            const worksheet = workbook.Sheets[sheetName];
+            let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            if (jsonData.length === 0) return;
+
+            const headerRow = jsonData[0];
+            const columnDIndex = headerRow.indexOf('Date Of Birth');
+
+            if (columnDIndex !== -1) {
+                for (let i = 1; i < jsonData.length; i++) {
+                    let dateValue = jsonData[i][columnDIndex];
+                    let dateObj = null;
+
+                    if (typeof dateValue === 'number') {
+                        const date = XLSX.SSF.parse_date_code(dateValue);
+                        dateObj = new Date(date.y, date.m - 1, date.d);
+                    } else if (typeof dateValue === 'string') {
+                        const formats = [
+                            { regex: /(\d{2})\/(\d{2})\/(\d{4})/, parts: [1, 2, 3] },
+                            { regex: /(\d{2})-(\d{2})-(\d{4})/, parts: [1, 2, 3] },
+                            { regex: /(\d{4})-(\d{2})-(\d{2})/, parts: [3, 2, 1] }
+                        ];
+                        for (const format of formats) {
+                            const match = dateValue.match(format.regex);
+                            if (match) {
+                                const day = parseInt(match[format.parts[0]], 10);
+                                const month = parseInt(match[format.parts[1]], 10);
+                                const year = parseInt(match[format.parts[2]], 10);
+                                dateObj = new Date(year, month - 1, day);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (dateObj instanceof Date && !isNaN(dateObj)) {
+                        const day = String(dateObj.getDate()).padStart(2, '0');
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const year = dateObj.getFullYear();
+                        jsonData[i][columnDIndex] = `${day}/${month}/${year}`;
+                    }
+                }
+
+                jsonData.sort((a, b) => {
+                    const dateA = parseDateString(a[columnDIndex]);
+                    const dateB = parseDateString(b[columnDIndex]);
+                    return dateA - dateB;
+                });
+
+                headerRow.splice(columnDIndex + 1, 0, 'Time Gap');
+                for (let i = 1; i < jsonData.length; i++) {
+                    jsonData[i].splice(columnDIndex + 1, 0, '');
+                    const reportingDateStr = jsonData[i][0];
+                    const dobStr = jsonData[i][columnDIndex];
+                    const reportingDate = parseDateString(reportingDateStr);
+                    const dob = parseDateString(dobStr);
+                    if (!isNaN(reportingDate) && !isNaN(dob)) {
+                        const diffInDays = Math.floor((reportingDate - dob) / (1000 * 60 * 60 * 24));
+                        jsonData[i][columnDIndex + 1] = diffInDays;
+                    }
+                }
+            }
+
+            const roleIndex = headerRow.indexOf('Data Entered by (Role)');
+            const statusIndex = headerRow.indexOf('Status');
+            if (roleIndex !== -1 && statusIndex !== -1) {
+                for (let i = jsonData.length - 1; i >= 1; i--) {
+                    const role = jsonData[i][roleIndex];
+                    const status = jsonData[i][statusIndex];
+                    if (status === 'Application Submitted' || status === 'Rejected') {
+                        jsonData.splice(i, 1);
+                    }
+                }
+                const rejectedRoles = ['GovtHospitalDEO', 'PvtHospitalDEO', 'PanchayatDEO', 'UlbDEO'];
+                for (let i = jsonData.length - 1; i >= 1; i--) {
+                    const role = jsonData[i][roleIndex];
+                    const status = jsonData[i][statusIndex];
+                    if (rejectedRoles.includes(role) && status === 'Rejected') {
+                        jsonData.splice(i, 1);
+                    }
+                }
+            }
+
+            const applTypeIndex = headerRow.indexOf('Appl Type');
+            if (applTypeIndex !== -1 && columnDIndex !== -1) {
+                for (let i = 1; i < jsonData.length; i++) {
+                    const applType = jsonData[i][applTypeIndex];
+                    const dob = jsonData[i][columnDIndex];
+                    let year = 'Unknown';
+                    if (dob) {
+                        const yearMatch = dob.match(/\d{2}\/\d{2}\/(\d{4})/);
+                        if (yearMatch) year = yearMatch[1];
+                    }
+                    if (!birthStats[year]) {
+                        birthStats[year] = {
+                            'Normal Birth': 0,
+                            'Still Birth': 0,
+                            'Old Reg. Event Birth': 0,
+                            'Others': 0
+                        };
+                    }
+                    const validTypes = ['Normal Birth', 'Still Birth', 'Old Reg. Event Birth'];
+                    if (validTypes.includes(applType)) {
+                        birthStats[year][applType]++;
+                    } else if (applType) {
+                        birthStats[year]['Others']++;
+                    }
+                }
+            }
+
+            const placeOfBirthIndex = headerRow.indexOf('Place of Birth');
+            const descPlaceOfBirthIndex = headerRow.indexOf('Description of Place of birth');
+            if (placeOfBirthIndex !== -1 && descPlaceOfBirthIndex !== -1 && columnDIndex !== -1) {
+                for (let i = 1; i < jsonData.length; i++) {
+                    const place = (jsonData[i][placeOfBirthIndex] || '').toLowerCase().trim();
+                    const desc = (jsonData[i][descPlaceOfBirthIndex] || '').trim();
+                    const dob = jsonData[i][columnDIndex];
+                    let year = 'Unknown';
+                    if (dob) {
+                        const yearMatch = dob.match(/\d{2}\/\d{2}\/(\d{4})/);
+                        if (yearMatch) year = yearMatch[1];
+                    }
+                    if (!birthStats[year]) birthStats[year] = {};
+                    const statsYear = birthStats[year];
+                    if (place === 'hospital') {
+                        statsYear.hospitalPlaceCounts = statsYear.hospitalPlaceCounts || {};
+                        statsYear.hospitalPlaceCounts[desc] = (statsYear.hospitalPlaceCounts[desc] || 0) + 1;
+                    } else if (['home', 'house', 'home delivery'].includes(place)) {
+                        statsYear.homePlaceCounts = statsYear.homePlaceCounts || {};
+                        statsYear.homePlaceCounts[desc] = (statsYear.homePlaceCounts[desc] || 0) + 1;
+                    }
+                }
+            }
+
+            const newWorksheet = XLSX.utils.aoa_to_sheet(jsonData);
+            processedWorkbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(processedWorkbook, newWorksheet, sheetName);
+        });
+
+        return { processedWorkbook, birthStats };
+    }
+
+    function parseDateString(dateStr) {
+        if (!dateStr) return new Date(0);
+        const match = dateStr.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        if (match) {
+            const day = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10);
+            const year = parseInt(match[3], 10);
+            return new Date(year, month - 1, day);
+        }
+        return new Date(0);
+    }
+
+    function displayStatistics() {
+        statsOutput.innerHTML = '';
+        statsMap.forEach((birthStats, fileName) => {
+            const fileDiv = document.createElement('div');
+            fileDiv.className = 'file-section fade-in';
+            const fileTitle = document.createElement('h3');
+            fileTitle.innerHTML = `<i class="fas fa-file-excel"></i> ${fileName}`;
+            fileDiv.appendChild(fileTitle);
+
+            const sortedYears = Object.keys(birthStats).sort((a, b) => b - a);
+            for (const year of sortedYears) {
+                const yearDiv = document.createElement('div');
+                yearDiv.className = 'year-section';
+                const yearTitle = document.createElement('div');
+                yearTitle.className = 'year-title';
+                yearTitle.innerHTML = `<i class="fas fa-calendar-alt"></i> ${year}`;
+                yearDiv.appendChild(yearTitle);
+
+                const stats = birthStats[year];
+                for (const [type, count] of Object.entries(stats)) {
+                    if (['Normal Birth', 'Still Birth', 'Old Reg. Event Birth', 'Others'].includes(type) && count > 0) {
+                        const statLine = document.createElement('div');
+                        statLine.className = 'stat-item';
+                        
+                        let iconClass = 'fas fa-baby';
+                        if (type === 'Still Birth') iconClass = 'fas fa-heart-broken';
+                        if (type === 'Old Reg. Event Birth') iconClass = 'fas fa-history';
+                        if (type === 'Others') iconClass = 'fas fa-question-circle';
+                        
+                        statLine.innerHTML = `<i class="${iconClass}"></i> <strong>${type}:</strong> ${count}`;
+                        yearDiv.appendChild(statLine);
+                    }
+                }
+
+                if (stats.hospitalPlaceCounts) {
+                    const hospitalSection = document.createElement('div');
+                    hospitalSection.className = 'place-section';
+                    const hospitalTitle = document.createElement('div');
+                    hospitalTitle.className = 'place-title';
+                    hospitalTitle.innerHTML = `<i class="fas fa-hospital"></i> Hospital Births`;
+                    hospitalSection.appendChild(hospitalTitle);
+                    
+                    for (const [desc, count] of Object.entries(stats.hospitalPlaceCounts)) {
+                        const line = document.createElement('div');
+                        line.className = 'stat-item';
+                        line.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${desc}: ${count}`;
+                        hospitalSection.appendChild(line);
+                    }
+                    
+                    yearDiv.appendChild(hospitalSection);
+                }
+
+                if (stats.homePlaceCounts) {
+                    const homeSection = document.createElement('div');
+                    homeSection.className = 'place-section';
+                    const homeTitle = document.createElement('div');
+                    homeTitle.className = 'place-title';
+                    homeTitle.innerHTML = `<i class="fas fa-home"></i> Home Births`;
+                    homeSection.appendChild(homeTitle);
+                    
+                    for (const [desc, count] of Object.entries(stats.homePlaceCounts)) {
+                        const line = document.createElement('div');
+                        line.className = 'stat-item';
+                        line.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${desc}: ${count}`;
+                        homeSection.appendChild(line);
+                    }
+                    
+                    yearDiv.appendChild(homeSection);
+                }
+
+                fileDiv.appendChild(yearDiv);
+            }
+
+            statsOutput.appendChild(fileDiv);
+        });
+    }
+</script>
+</body>
+</html>

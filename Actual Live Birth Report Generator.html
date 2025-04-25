@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actual Live Birth Report Generator</title>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --secondary: #3f37c9;
+      --dark: #1b263b;
+      --light: #f8f9fa;
+      --success: #4cc9f0;
+      --warning: #f72585;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f0f2f5;
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: white;
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 25px;
+      font-weight: 600;
+      font-size: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+
+    input[type="date"],
+    input[type="file"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      transition: var(--transition);
+    }
+
+    input[type="date"]:focus,
+    input[type="file"]:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      font-size: 100px;
+      opacity: 0;
+      right: 0;
+      top: 0;
+    }
+
+    .file-input-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 15px;
+      background: #f8f9fa;
+      border: 1px dashed #ccc;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .file-input-label:hover {
+      background: #e9ecef;
+      border-color: var(--primary-light);
+    }
+
+    .file-input-text {
+      color: #666;
+    }
+
+    .file-input-button {
+      background: var(--primary-light);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background-color: var(--secondary);
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .file-list {
+      margin-top: 15px;
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: var(--border-radius);
+      padding: 10px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .file-item:last-child {
+      border-bottom: none;
+    }
+
+    .file-icon {
+      margin-right: 10px;
+      color: var(--primary);
+    }
+
+    .filter-info {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+    }
+
+    .filter-info h3 {
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+
+    .filter-info ul {
+      padding-left: 20px;
+    }
+
+    .filter-info li {
+      margin-bottom: 5px;
+    }
+
+    .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      
+      h2 {
+        font-size: 24px;
+      }
+      
+      input[type="date"],
+      input[type="file"],
+      button {
+        padding: 10px 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 15px;
+      }
+      
+      h2 {
+        font-size: 22px;
+        margin-bottom: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📊 Actual Live Birth Report Generator</h2>
+    
+    <div class="form-group">
+      <label for="fromDate">From Date</label>
+      <input type="date" id="fromDate" class="form-control">
+    </div>
+    
+    <div class="form-group">
+      <label for="toDate">To Date</label>
+      <input type="date" id="toDate" class="form-control">
+    </div>
+    
+    <div class="form-group">
+      <label>Upload Excel Files</label>
+      <div class="file-input-wrapper">
+        <label class="file-input-label" for="fileInput">
+          <span class="file-input-text" id="fileInputText">Choose files...</span>
+          <span class="file-input-button">Browse</span>
+        </label>
+        <input type="file" id="fileInput" accept=".xlsx" multiple>
+      </div>
+      <div class="file-list" id="fileList"></div>
+    </div>
+    
+    <button onclick="processFiles()" id="generateBtn">
+      <span class="spinner" id="spinner"></span>
+      Generate Live Birth Report.xlsx
+    </button>
+
+    <div class="filter-info">
+      <h3>Current Filter Rules:</h3>
+      <ul>
+        <li>Excluding citizen-submitted applications with status "Application Submitted" or "Rejected"</li>
+        <li>Excluding "Still Birth" and "Old Reg. Event Birth" application types</li>
+        <li>Excluding all records with "Rejected" status</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Display selected files
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+      
+      if (this.files.length === 0) {
+        document.getElementById('fileInputText').textContent = 'Choose files...';
+        return;
+      }
+      
+      document.getElementById('fileInputText').textContent = `${this.files.length} file(s) selected`;
+      
+      Array.from(this.files).forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+          <span class="file-icon">📄</span>
+          <span>${index + 1}. ${file.name}</span>
+        `;
+        fileList.appendChild(fileItem);
+      });
+    });
+
+    async function processFiles() {
+      const fromDate = new Date(document.getElementById('fromDate').value);
+      const toDate = new Date(document.getElementById('toDate').value);
+      const files = document.getElementById('fileInput').files;
+      const generateBtn = document.getElementById('generateBtn');
+      const spinner = document.getElementById('spinner');
+
+      // Validate inputs
+      if (!fromDate || !toDate) {
+        alert("Please select both date ranges.");
+        return;
+      }
+
+      if (files.length === 0) {
+        alert("Please upload at least one Excel file.");
+        return;
+      }
+
+      if (fromDate > toDate) {
+        alert("From Date cannot be after To Date.");
+        return;
+      }
+
+      // Show loading state
+      generateBtn.disabled = true;
+      spinner.style.display = 'block';
+      generateBtn.textContent = ' Generating...';
+
+      let reportData = [];
+      let sl = 1;
+
+      try {
+        // Process files in the exact order they were selected
+        for (const file of files) {
+          try {
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data);
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            
+            // Find column indexes for all required fields (case-insensitive)
+            const headers = jsonData[0].map(h => h ? h.toString().toLowerCase() : '');
+            
+            // Required columns
+            const dobColIndex = headers.findIndex(h => h.includes('date of birth'));
+            
+            // Optional filter columns
+            const roleColIndex = headers.findIndex(h => 
+              h.includes('data entered by') || h.includes('role'));
+            const statusColIndex = headers.findIndex(h => h.includes('status'));
+            const applTypeColIndex = headers.findIndex(h => 
+              h.includes('appl type') || h.includes('application type'));
+            
+            if (dobColIndex === -1) {
+              alert(`Could not find 'Date of Birth' column in ${file.name}`);
+              continue;
+            }
+
+            // Log warnings for missing optional columns
+            if (roleColIndex === -1) console.warn(`'Data Entered by (Role)' column not found in ${file.name}`);
+            if (statusColIndex === -1) console.warn(`'Status' column not found in ${file.name}`);
+            if (applTypeColIndex === -1) console.warn(`'Appl Type' column not found in ${file.name}`);
+
+            let jmtCount = 0;
+
+            for (let i = 1; i < jsonData.length; i++) {
+              const row = jsonData[i];
+              if (!row || row[dobColIndex] === undefined || row[dobColIndex] === null) continue;
+
+              // Check if record should be excluded based on filters
+              let excludeRecord = false;
+              
+              // 1. Check Status filter first (most restrictive)
+              if (statusColIndex !== -1 && row[statusColIndex] !== undefined) {
+                const status = String(row[statusColIndex]).toUpperCase();
+                if (status === "REJECTED") {
+                  excludeRecord = true;
+                }
+              }
+              
+              // 2. Check Role and Status combination
+              if (!excludeRecord && roleColIndex !== -1 && statusColIndex !== -1 && 
+                  row[roleColIndex] !== undefined && row[statusColIndex] !== undefined) {
+                const role = String(row[roleColIndex]).toUpperCase();
+                const status = String(row[statusColIndex]).toUpperCase();
+                if (role === "CITIZEN" && (status === "APPLICATION SUBMITTED" || status === "REJECTED")) {
+                  excludeRecord = true;
+                }
+              }
+              
+              // 3. Check Application Type
+              if (!excludeRecord && applTypeColIndex !== -1 && row[applTypeColIndex] !== undefined) {
+                const applType = String(row[applTypeColIndex]).toUpperCase();
+                if (applType === "STILL BIRTH" || applType === "OLD REG. EVENT BIRTH") {
+                  excludeRecord = true;
+                }
+              }
+              
+              if (excludeRecord) continue;
+
+              // Process date if record passed all filters
+              const dobValue = row[dobColIndex];
+              let dateVal;
+
+              if (typeof dobValue === 'number') {
+                const parsed = XLSX.SSF.parse_date_code(dobValue);
+                if (parsed) {
+                  dateVal = new Date(parsed.y, parsed.m - 1, parsed.d);
+                }
+              } else if (typeof dobValue === 'string') {
+                const parts = dobValue.split('/');
+                if (parts.length === 3) {
+                  dateVal = new Date(parts[2], parts[1] - 1, parts[0]);
+                }
+              }
+
+              if (dateVal && !isNaN(dateVal.getTime())) {
+                const compareDate = new Date(dateVal.getFullYear(), dateVal.getMonth(), dateVal.getDate());
+                const fromCompare = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+                const toCompare = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate() + 1);
+
+                if (compareDate >= fromCompare && compareDate < toCompare) {
+                  jmtCount++;
+                }
+              }
+            }
+
+            // Add row with formulas in Excel format
+            const rowNum = sl + 1; // +1 for header row
+            reportData.push([
+              sl++,
+              file.name.replace('.xlsx', ''),
+              null, // Actual Live Birth Event (blank)
+              jmtCount,
+              { f: `C${rowNum}-D${rowNum}` }, // Pending formula
+              { 
+                f: `IF(C${rowNum}=0,"N/A",(D${rowNum}/C${rowNum})*100)`, // Percentage formula
+                t: 'n', // Set cell type as number
+                z: '0.00'
+              }
+            ]);
+
+          } catch (error) {
+            console.error(`Error processing file ${file.name}:`, error);
+            alert(`Error processing file ${file.name}. See console for details.`);
+          }
+        }
+
+        // Prepare worksheet data
+        const ws_data = [
+          ["SL No.", "Hospital Name", "Actual Live Birth Events", "JMT Entry", "Pending", "Completed (%)"],
+          ...reportData
+        ];
+
+        // Create workbook and export
+        const ws = XLSX.utils.aoa_to_sheet(ws_data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Live Birth Report");
+        
+        // Format columns for better Excel display
+        if (ws['!cols'] === undefined) ws['!cols'] = [];
+        ws['!cols'][0] = { wch: 8 };  // SL No.
+        ws['!cols'][1] = { wch: 30 }; // Hospital Name
+        ws['!cols'][2] = { wch: 20 }; // Actual Live Birth Events
+        ws['!cols'][3] = { wch: 20 }; // JMT Entry
+        ws['!cols'][4] = { wch: 20 }; // Pending
+        ws['!cols'][5] = { wch: 20 }; // Completed
+
+        XLSX.writeFile(wb, "Live Birth Report.xlsx");
+
+      } catch (error) {
+        console.error('Error generating report:', error);
+        alert('An error occurred while generating the report. Please check your internet connection & try again.');
+      } finally {
+        // Reset loading state
+        generateBtn.disabled = false;
+        spinner.style.display = 'none';
+        generateBtn.textContent = 'Generate Live Birth Report.xlsx';
+      }
+    }
+  </script>
+</body>
+</html>

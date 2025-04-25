@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Birth Certificate Analytics Dashboard</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background-color: #f5f7fa;
+    }
+    header {
+      background: linear-gradient(to right, #00a5cf, #8fb996);
+      color: white;
+      padding: 20px 40px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+    header p {
+      margin-top: 4px;
+      font-size: 14px;
+    }
+    .upload-section {
+      background: white;
+      padding: 20px;
+      margin: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .upload-section h2 {
+      margin-top: 0;
+    }
+    .upload-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .filter-section {
+      background: white;
+      padding: 20px;
+      margin: 0 20px 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filter-group label {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    select, button {
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #00a5cf;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #52796F;
+    }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    #dashboard {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 0 20px 40px;
+    }
+    .chart-container {
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      width: 48%;
+      min-height: 400px;
+    }
+    @media (max-width: 768px) {
+      .chart-container { width: 100%; }
+      .filter-section { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Birth Application Analytics Dashboard</h1>
+    <p>Interactive Visualization of Birth Registration Data</p>
+  </header>
+
+  <div class="upload-section">
+    <h2>Upload Your Data</h2>
+    <div class="upload-controls">
+      <input type="file" id="fileInput" accept=".xlsx, .xls">
+      <button onclick="loadFile()">Load Data</button>
+      <span id="recordCount"></span>
+    </div>
+  </div>
+
+  <div class="filter-section" id="filterSection" style="display: none;">
+    <h3 style="margin: 0; width: 100%;">Filter by Date of Birth</h3>
+    <div class="filter-group">
+      <label for="yearFilter">Year:</label>
+      <select id="yearFilter" onchange="updateMonthFilter()">
+        <option value="">All Years</option>
+      </select>
+    </div>
+    <div class="filter-group" id="monthFilterGroup" style="display: none;">
+      <label for="monthFilter">Month:</label>
+      <select id="monthFilter" onchange="applyFilters()">
+        <option value="">All Months</option>
+        <option value="0">January</option>
+        <option value="1">February</option>
+        <option value="2">March</option>
+        <option value="3">April</option>
+        <option value="4">May</option>
+        <option value="5">June</option>
+        <option value="6">July</option>
+        <option value="7">August</option>
+        <option value="8">September</option>
+        <option value="9">October</option>
+        <option value="10">November</option>
+        <option value="11">December</option>
+      </select>
+    </div>
+    <button onclick="clearFilters()" id="clearFiltersBtn" disabled>Clear Filters</button>
+  </div>
+
+  <div id="dashboard"></div>
+
+  <script>
+    const colorPalettes = [
+      ['#6A994E', '#A7C957', '#F2E8CF', '#BC4749', '#386641'],
+      ['#4F86C6', '#A1C6EA', '#FFE1A8', '#FFADAD', '#CA7DF9'],
+      ['#90BE6D', '#F9C74F', '#F9844A', '#43AA8B', '#577590'],
+      ['#FFB5A7', '#FCD5CE', '#F8EDEB', '#E5989B', '#B5838D']
+    ];
+    let paletteIndex = 0;
+    let allData = []; // Store the original unfiltered data
+
+    function loadFile() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(firstSheet);
+        
+        allData = json; // Store the original data
+        document.getElementById('recordCount').textContent = `Loaded ${json.length} records`;
+        
+        // Show filter section and populate year filter
+        document.getElementById('filterSection').style.display = 'flex';
+        populateYearFilter(json);
+        
+        generateDashboard(json);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function populateYearFilter(data) {
+      const yearFilter = document.getElementById('yearFilter');
+      // Clear existing options except the first one
+      while (yearFilter.options.length > 1) {
+        yearFilter.remove(1);
+      }
+      
+      // Extract unique years from Date Of Birth
+      const years = new Set();
+      data.forEach(item => {
+        if (item['Date Of Birth']) {
+          const date = parseDate(item['Date Of Birth']);
+          if (!isNaN(date)) {
+            years.add(date.getFullYear());
+          }
+        }
+      });
+      
+      // Add sorted years to dropdown (newest first)
+      Array.from(years).sort((a, b) => b - a).forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearFilter.appendChild(option);
+      });
+    }
+
+    function updateMonthFilter() {
+      const yearFilter = document.getElementById('yearFilter');
+      const monthFilterGroup = document.getElementById('monthFilterGroup');
+      
+      if (yearFilter.value) {
+        monthFilterGroup.style.display = 'flex';
+      } else {
+        monthFilterGroup.style.display = 'none';
+        document.getElementById('monthFilter').value = '';
+      }
+      
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const yearFilter = document.getElementById('yearFilter').value;
+      const monthFilter = document.getElementById('monthFilter').value;
+      
+      // Enable/disable clear filters button
+      document.getElementById('clearFiltersBtn').disabled = !yearFilter && !monthFilter;
+      
+      // Filter the data
+      let filteredData = allData.filter(item => {
+        if (!item['Date Of Birth']) return false; // Exclude records with no date
+        
+        const date = parseDate(item['Date Of Birth']);
+        if (isNaN(date)) return false; // Exclude invalid dates
+        
+        // Apply year filter if set
+        if (yearFilter && date.getFullYear() !== parseInt(yearFilter)) {
+          return false;
+        }
+        
+        // Apply month filter if set and year is selected
+        if (yearFilter && monthFilter && date.getMonth() !== parseInt(monthFilter)) {
+          return false;
+        }
+        
+        return true;
+      });
+      
+      // Update the dashboard with filtered data
+      generateDashboard(filteredData);
+    }
+
+    function clearFilters() {
+      document.getElementById('yearFilter').value = '';
+      document.getElementById('monthFilter').value = '';
+      document.getElementById('monthFilterGroup').style.display = 'none';
+      document.getElementById('clearFiltersBtn').disabled = true;
+      generateDashboard(allData);
+    }
+
+    function parseDate(dateValue) {
+      // Handle Excel date serial numbers (days since 1900)
+      if (typeof dateValue === 'number') {
+        const excelEpoch = new Date(1899, 11, 30);
+        const date = new Date(excelEpoch.getTime() + dateValue * 86400000);
+        return date;
+      }
+      
+      // Handle string dates explicitly in DD/MM/YYYY format
+      if (typeof dateValue === 'string') {
+        const match = dateValue.match(/^(\d{2})\/(\d{2})\/(\d{4})$/); // DD/MM/YYYY
+        if (match) {
+			const [_, day, month, year] = match;
+			const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+			return isNaN(date) ? new Date(NaN) : date;
+        }
+		
+        // Fallback to standard Date parsing
+		const date = new Date(dateValue);
+		return isNaN(date) ? new Date(NaN) : date;
+	  }
+	  
+	  return new Date(NaN);
+    }
+
+    function generateDashboard(data) {
+      document.getElementById('dashboard').innerHTML = '';
+      if (data.length === 0) {
+        document.getElementById('dashboard').innerHTML = '<p style="padding: 20px; color: #666;">No data matches the selected filters.</p>';
+        return;
+      }
+
+      const addChart = (title, labels, values) => {
+        const id = 'chart-' + Math.random().toString(36).substring(2);
+        const div = document.createElement('div');
+        div.className = 'chart-container';
+        div.id = id;
+        document.getElementById('dashboard').appendChild(div);
+
+        const currentPalette = colorPalettes[paletteIndex % colorPalettes.length];
+        const colors = labels.map((_, i) => currentPalette[i % currentPalette.length]);
+        paletteIndex++;
+
+        Plotly.newPlot(id, [{
+          x: labels,
+          y: values,
+          type: 'bar',
+          marker: { color: colors }
+        }], {
+          title,
+          font: { family: 'Segoe UI' }
+        });
+      };
+
+      const groupBy = (arr, key) => {
+        const result = {};
+        arr.forEach(item => {
+          const val = item[key] || 'Unknown';
+          result[val] = (result[val] || 0) + 1;
+        });
+        return result;
+      };
+
+      const bucketBy = (arr, key, buckets) => {
+        const result = Array(buckets.length).fill(0);
+        arr.forEach(item => {
+          const value = parseFloat(item[key]);
+          for (let i = 0; i < buckets.length; i++) {
+            const [min, max] = buckets[i];
+            if (value >= min && (max === null || value < max)) {
+              result[i]++;
+              break;
+            }
+          }
+        });
+        return result;
+      };
+
+      const monthlyCountWithYear = (arr, key) => {
+        const result = {};
+        arr.forEach(item => {
+          const date = parseDate(item[key]);
+          if (!isNaN(date)) {
+            const label = `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+            result[label] = (result[label] || 0) + 1;
+          }
+        });
+        const sortedLabels = Object.keys(result).sort((a, b) => new Date(a) - new Date(b));
+        return [sortedLabels, sortedLabels.map(l => result[l])];
+      };
+
+      const [reportLabels, reportValues] = monthlyCountWithYear(data, 'Reporting Date');
+      addChart('Applications by Reporting Date', reportLabels, reportValues);
+
+      const [dobLabels, dobValues] = monthlyCountWithYear(data, 'Date Of Birth');
+      addChart('Applications by Date of Birth', dobLabels, dobValues);
+
+      const timeGapBuckets = [[0, 3], [3, 8], [8, 22], [22, 31], [31, 366], [366, null]];
+      const timeGapLabels = ['0-2 days', '3-7 days', '8-21 days', '22-30 days', '31-365 days', '365+ days'];
+      addChart('Time Gap Distribution', timeGapLabels, bucketBy(data, 'Time Gap', timeGapBuckets));
+
+      const firstNameMissing = data.filter(d => !d['First Name'] && d['Appl Type'] !== 'Still Birth').length;
+      addChart('Missing First Names (Excl. Still Birth)', ['Missing', 'Present'], [firstNameMissing, data.length - firstNameMissing]);
+
+      const fields = [
+        ['Place of Birth', 'Place of Birth'],
+        ["Id Proof Type", "Father's ID Proof"],
+        ["Id Proof Type__1", "Mother's ID Proof"],
+        ['District', 'Present Address - District'],
+        ['Block/Municipality', 'Present Address - Block/Municipality'],
+        ['District__1', 'Permanent Address - District'],
+        ['Block/Municipality__1', 'Permanent Address - Block/Municipality'],
+        ['Religion', 'Religion'],
+        ["Father's Level Of Education", "Father's Education"],
+        ["Father's Occupation", "Father's Occupation"],
+        ["Mother's Level Of Education", "Mother's Education"],
+        ["Mother's Occupation", "Mother's Occupation"],
+        ['Status', 'Application Status'],
+        ['Appl Type', 'Application Type'],
+        ['Type Of Attention At Delivery', 'Type of Attention at Delivery'],
+        ['Delivery Method', 'Delivery Method'],
+        ['Data Entered by (Role)', 'Entered By (Role)']
+      ];
+
+      fields.forEach(([key, title]) => {
+        const grouped = groupBy(data, key);
+        addChart(title, Object.keys(grouped), Object.values(grouped));
+      });
+
+      const weightBuckets = [[0, 1], [1, 1.5], [1.5, 2], [2, 2.5], [2.5, 3], [3, 3.5], [3.5, null]];
+      const weightLabels = ['<1 KG', '1-1.5 KG', '1.5-2 KG', '2-2.5 KG', '2.5-3 KG', '3-3.5 KG', '>3.5 KG'];
+      addChart('Birth Weight Distribution', weightLabels, bucketBy(data, 'Birth Weight (Kg)', weightBuckets));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XLSX to CSV & CSV to JSON Converter</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --accent-color: #4cc9f0;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+      --success-color: #4bb543;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      line-height: 1.6;
+      color: var(--dark-color);
+      background-color: #f5f7fa;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      color: #6c757d;
+      margin-bottom: 20px;
+    }
+
+    .converter-section {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      color: var(--secondary-color);
+      margin-bottom: 15px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+    }
+
+    h2 svg {
+      margin-right: 10px;
+      width: 24px;
+      height: 24px;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      margin-bottom: 15px;
+    }
+
+    .file-input-label {
+      display: block;
+      padding: 12px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.3s;
+    }
+
+    .file-input-label:hover {
+      background-color: var(--secondary-color);
+    }
+
+    .file-input {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .file-name {
+      margin-top: 5px;
+      font-size: 14px;
+      color: #6c757d;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    .btn:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .btn-success:hover {
+      background-color: #3a9a35;
+    }
+
+    .btn-group {
+      margin-bottom: 15px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      resize: vertical;
+      margin-top: 10px;
+      transition: border 0.3s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(76, 201, 240, 0.3);
+    }
+
+    .output-container {
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 5px 10px;
+      background-color: rgba(0, 0, 0, 0.1);
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.3s;
+    }
+
+    .copy-btn:hover {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .status-message {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      display: none;
+    }
+
+    .success {
+      background-color: rgba(75, 181, 67, 0.2);
+      color: var(--success-color);
+      display: block;
+    }
+
+    .error {
+      background-color: rgba(220, 53, 69, 0.2);
+      color: #dc3545;
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+
+      .converter-section {
+        padding: 15px;
+      }
+
+      .btn {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>File Format Converter</h1>
+      <p class="subtitle">Convert between XLSX, CSV, and JSON formats easily</p>
+    </header>
+
+    <div class="converter-section">
+      <h2>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        Convert .xlsx to .csv
+      </h2>
+
+      <div class="file-input-wrapper">
+        <label class="file-input-label" for="xlsxFile">Choose XLSX File</label>
+        <input type="file" id="xlsxFile" class="file-input" accept=".xlsx" />
+        <div class="file-name" id="xlsxFileName">No file chosen</div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn" onclick="convertXLSXtoCSV()">Convert XLSX to CSV</button>
+      </div>
+
+      <div class="output-container">
+        <textarea id="csvOutput" placeholder="CSV output will appear here..."></textarea>
+        <button class="copy-btn" onclick="copyToClipboard('csvOutput')">Copy</button>
+      </div>
+
+      <div id="csvStatus" class="status-message"></div>
+    </div>
+
+    <div class="converter-section">
+      <h2>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+        </svg>
+        Convert .csv to .json
+      </h2>
+
+      <div class="btn-group">
+        <button class="btn" onclick="convertCSVtoJSON()">Convert CSV to JSON</button>
+        <button class="btn btn-success" id="exportJsonBtn" onclick="exportJSON()" disabled>Export JSON File</button>
+      </div>
+
+      <div class="output-container">
+        <textarea id="jsonOutput" placeholder="JSON output will appear here..."></textarea>
+        <button class="copy-btn" onclick="copyToClipboard('jsonOutput')">Copy</button>
+      </div>
+
+      <div id="jsonStatus" class="status-message"></div>
+    </div>
+  </div>
+
+  <script>
+    let csvData = "";
+    let jsonData = null;
+
+    document.getElementById('xlsxFile').addEventListener('change', function(e) {
+      const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
+      document.getElementById('xlsxFileName').textContent = fileName;
+    });
+
+    function convertXLSXtoCSV() {
+      const fileInput = document.getElementById('xlsxFile');
+      const file = fileInput.files[0];
+      const statusElement = document.getElementById('csvStatus');
+
+      if (!file) {
+        statusElement.textContent = "Please upload a .xlsx file first.";
+        statusElement.className = "status-message error";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const csv = XLSX.utils.sheet_to_csv(sheet);
+          document.getElementById('csvOutput').value = csv;
+          csvData = csv;
+
+          statusElement.textContent = "Conversion successful! CSV data is ready.";
+          statusElement.className = "status-message success";
+        } catch (error) {
+          statusElement.textContent = "Error converting file: " + error.message;
+          statusElement.className = "status-message error";
+        }
+      };
+
+      reader.onerror = function() {
+        statusElement.textContent = "Error reading the file.";
+        statusElement.className = "status-message error";
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    function convertCSVtoJSON() {
+      const statusElement = document.getElementById('jsonStatus');
+
+      if (!csvData && !document.getElementById('csvOutput').value) {
+        statusElement.textContent = "Please convert XLSX to CSV first or paste CSV data in the textarea.";
+        statusElement.className = "status-message error";
+        return;
+      }
+
+      const csvToParse = csvData || document.getElementById('csvOutput').value;
+
+      try {
+        Papa.parse(csvToParse, {
+          header: true,
+          skipEmptyLines: true,
+          complete: function (results) {
+            jsonData = results.data;
+            const jsonString = JSON.stringify(jsonData, null, 2);
+            document.getElementById('jsonOutput').value = jsonString;
+            document.getElementById('exportJsonBtn').disabled = false;
+
+            statusElement.textContent = "Conversion successful! JSON data is ready.";
+            statusElement.className = "status-message success";
+          },
+          error: function(error) {
+            statusElement.textContent = "Error parsing CSV: " + error.message;
+            statusElement.className = "status-message error";
+          }
+        });
+      } catch (error) {
+        statusElement.textContent = "Error converting CSV to JSON: " + error.message;
+        statusElement.className = "status-message error";
+      }
+    }
+
+    function exportJSON() {
+      if (!jsonData && !document.getElementById('jsonOutput').value) {
+        alert("No JSON data to export. Please convert CSV to JSON first.");
+        return;
+      }
+
+      const jsonToExport = jsonData || JSON.parse(document.getElementById('jsonOutput').value);
+      const jsonString = JSON.stringify(jsonToExport, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const xlsxFile = document.getElementById('xlsxFile').files[0];
+      const fileName = (xlsxFile?.name || 'converted_data.xlsx').replace(/\.[^/.]+$/, "") + '.json';
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+    }
+
+    function copyToClipboard(elementId) {
+      const element = document.getElementById(elementId);
+      element.select();
+      document.execCommand('copy');
+
+      const statusElement = elementId === 'csvOutput'
+        ? document.getElementById('csvStatus')
+        : document.getElementById('jsonStatus');
+
+      statusElement.textContent = "Copied to clipboard!";
+      statusElement.className = "status-message success";
+
+      window.getSelection().removeAllRanges();
+    }
+  </script>
+</body>
+</html>

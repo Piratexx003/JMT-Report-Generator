@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actual Death Report Generator</title>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --secondary: #3f37c9;
+      --dark: #1b263b;
+      --light: #f8f9fa;
+      --success: #4cc9f0;
+      --warning: #f72585;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f0f2f5;
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: white;
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 25px;
+      font-weight: 600;
+      font-size: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+
+    input[type="date"],
+    input[type="file"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      transition: var(--transition);
+    }
+
+    input[type="date"]:focus,
+    input[type="file"]:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      font-size: 100px;
+      opacity: 0;
+      right: 0;
+      top: 0;
+    }
+
+    .file-input-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 15px;
+      background: #f8f9fa;
+      border: 1px dashed #ccc;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .file-input-label:hover {
+      background: #e9ecef;
+      border-color: var(--primary-light);
+    }
+
+    .file-input-text {
+      color: #666;
+    }
+
+    .file-input-button {
+      background: var(--primary-light);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background-color: var(--secondary);
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .file-list {
+      margin-top: 15px;
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: var(--border-radius);
+      padding: 10px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .file-item:last-child {
+      border-bottom: none;
+    }
+
+    .file-icon {
+      margin-right: 10px;
+      color: var(--primary);
+    }
+
+    .note {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+      font-style: italic;
+    }
+
+    .stats {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      
+      h2 {
+        font-size: 24px;
+      }
+      
+      input[type="date"],
+      input[type="file"],
+      button {
+        padding: 10px 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 15px;
+      }
+      
+      h2 {
+        font-size: 22px;
+        margin-bottom: 15px;
+      }
+    }
+
+    /* Loading animation */
+    .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📊 Actual Death Report Generator</h2>
+    
+    <div class="form-group">
+      <label for="fromDate">From Date</label>
+      <input type="date" id="fromDate" class="form-control">
+    </div>
+    
+    <div class="form-group">
+      <label for="toDate">To Date</label>
+      <input type="date" id="toDate" class="form-control">
+    </div>
+    
+    <div class="form-group">
+      <label>Upload Excel Files</label>
+      <div class="file-input-wrapper">
+        <label class="file-input-label" for="fileInput">
+          <span class="file-input-text" id="fileInputText">Choose files...</span>
+          <span class="file-input-button">Browse</span>
+        </label>
+        <input type="file" id="fileInput" accept=".xlsx, .xls" multiple>
+      </div>
+      <div class="file-list" id="fileList"></div>
+      <p class="note">Note: Reports exclude citizen-submitted/rejected entries and all rejected status entries.</p>
+    </div>
+    
+    <button onclick="processFiles()" id="generateBtn">
+      <span class="spinner" id="spinner"></span>
+      Generate Death Report.xlsx
+    </button>
+
+    <div class="stats" id="processingStats" style="display: none;">
+      <h3>Processing Statistics</h3>
+      <div id="statsContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // Display selected files
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+      
+      if (this.files.length === 0) {
+        document.getElementById('fileInputText').textContent = 'Choose files...';
+        return;
+      }
+      
+      document.getElementById('fileInputText').textContent = `${this.files.length} file(s) selected`;
+      
+      Array.from(this.files).forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+          <span class="file-icon">📄</span>
+          <span>${index + 1}. ${file.name}</span>
+        `;
+        fileList.appendChild(fileItem);
+      });
+    });
+
+    function findColumnIndex(headers, possibleNames) {
+      if (!headers) return -1;
+      for (const name of possibleNames) {
+        const index = headers.findIndex(h => 
+          h && h.toString().toLowerCase().includes(name.toLowerCase())
+        );
+        if (index !== -1) return index;
+      }
+      return -1;
+    }
+
+    function shouldSkipRow(row, statusColIndex, roleColIndex) {
+      if (statusColIndex !== -1 && row[statusColIndex] && 
+          row[statusColIndex].toString().toLowerCase() === 'rejected') {
+        return true;
+      }
+      
+      if (roleColIndex !== -1 && statusColIndex !== -1 && 
+          row[roleColIndex] && row[roleColIndex].toString().toLowerCase() === 'citizen' &&
+          row[statusColIndex] && (
+            row[statusColIndex].toString().toLowerCase() === 'application submitted' ||
+            row[statusColIndex].toString().toLowerCase() === 'rejected'
+          )) {
+        return true;
+      }
+      
+      return false;
+    }
+
+    function parseDate(value) {
+      if (!value) return null;
+      
+      // Handle Excel numeric dates
+      if (typeof value === 'number') {
+        const parsed = XLSX.SSF.parse_date_code(value);
+        if (parsed) {
+          return new Date(parsed.y, parsed.m - 1, parsed.d);
+        }
+      }
+      
+      // Handle string dates
+      if (typeof value === 'string') {
+        // Try different date formats
+        const formats = [
+          { regex: /^(\d{2})\/(\d{2})\/(\d{4})$/, fn: (m) => new Date(m[3], m[2]-1, m[1]) }, // DD/MM/YYYY
+          { regex: /^(\d{2})-(\d{2})-(\d{4})$/, fn: (m) => new Date(m[3], m[2]-1, m[1]) }, // DD-MM-YYYY
+          { regex: /^(\d{4})-(\d{2})-(\d{2})$/, fn: (m) => new Date(m[1], m[2]-1, m[3]) }, // YYYY-MM-DD
+          { regex: /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, fn: (m) => new Date(m[3], m[1]-1, m[2]) }, // MM/DD/YYYY
+          { regex: /^(\d{1,2})-(\d{1,2})-(\d{4})$/, fn: (m) => new Date(m[3], m[1]-1, m[2]) }  // MM-DD-YYYY
+        ];
+        
+        for (const format of formats) {
+          const match = value.match(format.regex);
+          if (match) {
+            const date = format.fn(match);
+            if (!isNaN(date.getTime())) return date;
+          }
+        }
+      }
+      
+      return null;
+    }
+
+    async function processFiles() {
+      const fromDate = new Date(document.getElementById('fromDate').value);
+      const toDate = new Date(document.getElementById('toDate').value);
+      const files = document.getElementById('fileInput').files;
+      const generateBtn = document.getElementById('generateBtn');
+      const spinner = document.getElementById('spinner');
+      const statsDiv = document.getElementById('processingStats');
+      const statsContent = document.getElementById('statsContent');
+
+      if (!fromDate || !toDate) {
+        alert("Please select both date ranges.");
+        return;
+      }
+
+      if (files.length === 0) {
+        alert("Please upload at least one Excel file.");
+        return;
+      }
+
+      if (fromDate > toDate) {
+        alert("From Date cannot be after To Date.");
+        return;
+      }
+
+      // Show loading state
+      generateBtn.disabled = true;
+      spinner.style.display = 'block';
+      generateBtn.textContent = ' Generating...';
+      statsDiv.style.display = 'none';
+      statsContent.innerHTML = '';
+
+      let reportData = [];
+      let sl = 1;
+      let processingStats = [];
+
+      try {
+        // Process files in the exact order they were selected
+        for (const file of files) {
+          try {
+            const fileStats = {
+              fileName: file.name,
+              totalRows: 0,
+              skippedRejected: 0,
+              skippedCitizen: 0,
+              validEntries: 0,
+              jmtEntries: 0
+            };
+
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data);
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            
+            fileStats.totalRows = jsonData.length - 1; // Exclude header row
+
+            // Find column indices for required fields
+            const headers = jsonData[0] ? jsonData[0].map(h => h ? h.toString().toLowerCase() : '') : [];
+            
+            // Date of Death column (required)
+            const dobColIndex = findColumnIndex(headers, ['date of death', 'dod', 'death date']);
+            if (dobColIndex === -1) {
+              alert(`Could not find 'Date of Death' column in ${file.name}`);
+              continue;
+            }
+            
+            // Optional columns
+            const statusColIndex = findColumnIndex(headers, ['status', 'application status']);
+            const roleColIndex = findColumnIndex(headers, ['data entered by', 'role', 'entered by']);
+
+            let jmtCount = 0;
+            let totalValidEntries = 0;
+
+            // Process each row
+            for (let i = 1; i < jsonData.length; i++) {
+              const row = jsonData[i];
+              if (!row || row[dobColIndex] === undefined || row[dobColIndex] === null) continue;
+
+              // Check if row should be skipped
+              if (shouldSkipRow(row, statusColIndex, roleColIndex)) {
+                if (statusColIndex !== -1 && row[statusColIndex] && 
+                    row[statusColIndex].toString().toLowerCase() === 'rejected') {
+                  fileStats.skippedRejected++;
+                } else if (roleColIndex !== -1 && row[roleColIndex] && 
+                           row[roleColIndex].toString().toLowerCase() === 'citizen') {
+                  fileStats.skippedCitizen++;
+                }
+                continue;
+              }
+
+              const dobValue = row[dobColIndex];
+              const dateVal = parseDate(dobValue);
+
+              if (dateVal && !isNaN(dateVal.getTime())) {
+                totalValidEntries++;
+                
+                const compareDate = new Date(dateVal.getFullYear(), dateVal.getMonth(), dateVal.getDate());
+                const fromCompare = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+                const toCompare = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate() + 1);
+
+                if (compareDate >= fromCompare && compareDate < toCompare) {
+                  jmtCount++;
+                }
+              }
+            }
+
+            fileStats.validEntries = totalValidEntries;
+            fileStats.jmtEntries = jmtCount;
+            processingStats.push(fileStats);
+
+            // Add row with blank "Actual Death Event" column as requested
+            const rowNum = sl + 1; // +1 for header row
+            reportData.push([
+              sl++,
+              file.name.replace(/\.[^/.]+$/, ""), // Remove any extension
+              null, // Actual Death Event (blank as requested)
+              jmtCount,
+              { f: `C${rowNum}-D${rowNum}` }, // Pending formula (now C-D since B is blank)
+              { 
+                f: `IF(C${rowNum}=0,"N/A",(D${rowNum}/C${rowNum})*100)`, // Percentage formula
+                t: 'n',
+                z: '0.00'
+              }
+            ]);
+
+          } catch (error) {
+            console.error(`Error processing file ${file.name}:`, error);
+            alert(`Error processing file ${file.name}. See console for details.`);
+          }
+        }
+
+        // Prepare worksheet data with updated column name
+        const ws_data = [
+          ["SL No.", "Hospital Name", "Actual Death Events", "JMT Entry", "Pending", "Completed (%)"], // Updated column name
+          ...reportData
+        ];
+
+        // Create workbook and export
+        const ws = XLSX.utils.aoa_to_sheet(ws_data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Death Report");
+        
+        // Format columns for better Excel display
+        if (ws['!cols'] === undefined) ws['!cols'] = [];
+        ws['!cols'][0] = { wch: 8 };  // SL No.
+        ws['!cols'][1] = { wch: 30 }; // Hospital Name
+        ws['!cols'][2] = { wch: 20 }; // Actual Death Events
+        ws['!cols'][3] = { wch: 20 }; // JMT Entry
+        ws['!cols'][4] = { wch: 20 }; // Pending
+        ws['!cols'][5] = { wch: 20 }; // Completed
+
+        XLSX.writeFile(wb, "Death Report.xlsx");
+
+        // Show processing statistics
+        if (processingStats.length > 0) {
+          statsDiv.style.display = 'block';
+          let statsHTML = '<table style="width:100%; border-collapse: collapse;">';
+          statsHTML += '<tr><th style="text-align:left; padding:5px; border-bottom:1px solid #ddd;">File</th>' +
+                       '<th style="text-align:center; padding:5px; border-bottom:1px solid #ddd;">Total Rows</th>' +
+                       '<th style="text-align:center; padding:5px; border-bottom:1px solid #ddd;">Skipped (Rejected)</th>' +
+                       '<th style="text-align:center; padding:5px; border-bottom:1px solid #ddd;">Skipped (Citizen)</th>' +
+                       '<th style="text-align:center; padding:5px; border-bottom:1px solid #ddd;">Valid Entries</th>' +
+                       '<th style="text-align:center; padding:5px; border-bottom:1px solid #ddd;">JMT Entries</th></tr>';
+          
+          processingStats.forEach(stat => {
+            statsHTML += `<tr>
+              <td style="text-align:left; padding:5px; border-bottom:1px solid #eee;">${stat.fileName}</td>
+              <td style="text-align:center; padding:5px; border-bottom:1px solid #eee;">${stat.totalRows}</td>
+              <td style="text-align:center; padding:5px; border-bottom:1px solid #eee;">${stat.skippedRejected}</td>
+              <td style="text-align:center; padding:5px; border-bottom:1px solid #eee;">${stat.skippedCitizen}</td>
+              <td style="text-align:center; padding:5px; border-bottom:1px solid #eee;">${stat.validEntries}</td>
+              <td style="text-align:center; padding:5px; border-bottom:1px solid #eee;">${stat.jmtEntries}</td>
+            </tr>`;
+          });
+          
+          statsHTML += '</table>';
+          statsContent.innerHTML = statsHTML;
+        }
+
+      } catch (error) {
+        console.error('Error generating report:', error);
+        alert('An error occurred while generating the report. Please check your internet connection and try again.');
+      } finally {
+        // Reset loading state
+        generateBtn.disabled = false;
+        spinner.style.display = 'none';
+        generateBtn.textContent = 'Generate Death Report.xlsx';
+      }
+    }
+  </script>
+</body>
+</html>
