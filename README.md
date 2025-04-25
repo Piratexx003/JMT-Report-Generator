@@ -2,7 +2,9 @@
 📊 JMT Report Generator – Excel Report Tools - by Aniruddha Dey, DPA - Coochbehar
 
 > ⚠️ Disclaimer: These scripts are designed specifically for Excel files exported from the JMT Portal via  
-Report > Application List (Birth) or Report > Application List (Death).
+Report > Application List (Birth)
+               OR
+Report > Application List (Death).
 
  🔧 Features & Tools Overview
 
