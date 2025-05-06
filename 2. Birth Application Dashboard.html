@@ -167,7 +167,7 @@
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(firstSheet);
+        const json = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
         
         allData = json; // Store the original data
         document.getElementById('recordCount').textContent = `Loaded ${json.length} records`;
@@ -368,11 +368,11 @@
       const fields = [
         ['Place of Birth', 'Place of Birth'],
         ["Id Proof Type", "Father's ID Proof"],
-        ["Id Proof Type__1", "Mother's ID Proof"],
+        ["Id Proof Type_1", "Mother's ID Proof"],
         ['District', 'Present Address - District'],
         ['Block/Municipality', 'Present Address - Block/Municipality'],
-        ['District__1', 'Permanent Address - District'],
-        ['Block/Municipality__1', 'Permanent Address - Block/Municipality'],
+        ['District_1', 'Permanent Address - District'],
+        ['Block/Municipality_1', 'Permanent Address - Block/Municipality'],
         ['Religion', 'Religion'],
         ["Father's Level Of Education", "Father's Education"],
         ["Father's Occupation", "Father's Occupation"],
