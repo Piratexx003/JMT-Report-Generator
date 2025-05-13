@@ -408,9 +408,9 @@
       const [deathLabels, deathValues] = monthlyCount(data, 'Date Of Death');
       addChart('Applications by Date of Death', deathLabels, deathValues);
 
-      const gapBuckets = [[0, 3], [3, 7], [7, 31], [31, 366], [366, null]];
-      const gapLabels = ['0-2 days', '3-6 days', '7-30 days', '31-365 days', '365+ days'];
-      addChart('Time Gap Distribution', gapLabels, bucketBy(data, 'Time Gap', gapBuckets));
+      const timeGapBuckets = [[0, 3], [3, 8], [8, 22], [22, 31], [31, 366], [366, null]];
+      const timeGapLabels = ['0-2 days', '3-7 days', '8-21 days', '22-30 days', '31-365 days', '365+ days'];
+      addChart('Time Gap Distribution', timeGapLabels, bucketBy(data, 'Time Gap', timeGapBuckets));
 
       const ageBuckets = [
         [0, 1], [1, 5], [5, 15], [15, 25], [25, 35],
