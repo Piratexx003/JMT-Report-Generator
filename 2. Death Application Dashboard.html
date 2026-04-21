@@ -4,100 +4,134 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Death Certificate Application Dashboard</title>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
+    :root {
+      --primary: #1e5799;
+      --secondary: #2989d8;
+      --bg: #f5f7fa;
+      --white: #ffffff;
+      --text: #333;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+      --radius: 12px;
+    }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       margin: 0;
-      background-color: #f5f7fa;
+      background-color: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
     }
+
     header {
-      background: linear-gradient(to right, #1e5799, #2989d8);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: white;
-      padding: 20px 40px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      padding: 1.5rem 2%;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
     }
-    header h1 {
-      margin: 0;
-      font-size: 28px;
+
+    header h1 { margin: 0; font-size: 1.8rem; letter-spacing: -0.5px; }
+    header p { margin: 0.3rem 0 0; opacity: 0.9; font-size: 0.95rem; }
+
+    /* FULL PAGE VIEW CONTAINER */
+    .main-container {
+      width: 98%;
+      margin: 0 auto;
+      padding: 20px 0;
     }
-    header p {
-      margin-top: 4px;
-      font-size: 14px;
+
+    .card {
+      background: var(--white);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }
-    .upload-section {
-      background: white;
-      padding: 20px;
-      margin: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .upload-section h2 {
-      margin-top: 0;
-    }
+
     .upload-controls {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .filter-section {
-      background: white;
-      padding: 20px;
-      margin: 0 20px 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      display: flex;
       flex-wrap: wrap;
-      gap: 15px;
       align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
     }
+
+    .filter-section {
+      display: none; /* Toggled by logic */
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: flex-end;
+    }
+
     .filter-group {
       display: flex;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
+      gap: 0.5rem;
     }
+
     .filter-group label {
-      font-weight: 600;
-      font-size: 14px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #666;
     }
+
     select, button {
-      padding: 6px 12px;
-      font-size: 14px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      transition: all 0.2s ease;
+      background: white;
     }
+
     button {
-      background-color: #1e5799;
+      background-color: var(--primary);
       color: white;
       border: none;
+      font-weight: 600;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #2a8ad4;
-    }
-    button:disabled {
-      background-color: #cccccc;
-      cursor: not-allowed;
-    }
+
+    button:hover { background-color: #164375; transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    button:disabled { background-color: #ccc; cursor: not-allowed; transform: none; }
+
+    /* FULL WIDTH GRID FOR CHARTS */
     #dashboard {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      padding: 0 20px 40px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* Forces two charts per row */
+      gap: 1.5rem;
+      width: 100%;
     }
+
     .chart-container {
-      background: white;
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      width: 48%;
-      min-height: 400px;
+      background: var(--white);
+      padding: 1rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      min-height: 500px; /* Fixed height for consistent rows */
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
     }
+
+    #recordCount {
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 0.9rem;
+    }
+
+    /* RESPONSIVE: Stack charts on smaller screens */
+    @media (max-width: 1200px) {
+      #dashboard { grid-template-columns: 1fr; }
+      .main-container { width: 95%; }
+    }
+
     @media (max-width: 768px) {
-      .chart-container { width: 100%; }
-      .filter-section { flex-direction: column; align-items: flex-start; }
+      header { text-align: center; }
+      .filter-section { flex-direction: column; align-items: stretch; }
     }
   </style>
 </head>
@@ -107,45 +141,47 @@
     <p>Interactive Visualization of Death Registration Data</p>
   </header>
 
-  <div class="upload-section">
-    <h2>Upload Your Data</h2>
-    <div class="upload-controls">
-      <input type="file" id="fileInput" accept=".xlsx, .xls, .json">
-      <button onclick="loadFile()">Load Data</button>
-      <span id="recordCount"></span>
-    </div>
-  </div>
+  <div class="main-container">
+    <section class="card upload-section">
+      <h2 style="margin-top:0; font-size:1.2rem;">Upload Your Data</h2>
+      <div class="upload-controls">
+        <input type="file" id="fileInput" accept=".xlsx, .xls, .json">
+        <button onclick="loadFile()">Load Data</button>
+        <span id="recordCount"></span>
+      </div>
+    </section>
 
-  <div class="filter-section" id="filterSection" style="display: none;">
-    <h3 style="margin: 0; width: 100%;">Filter by Date of Death</h3>
-    <div class="filter-group">
-      <label for="yearFilter">Year:</label>
-      <select id="yearFilter" onchange="updateMonthFilter()">
-        <option value="">All Years</option>
-      </select>
-    </div>
-    <div class="filter-group" id="monthFilterGroup" style="display: none;">
-      <label for="monthFilter">Month:</label>
-      <select id="monthFilter" onchange="applyFilters()">
-        <option value="">All Months</option>
-        <option value="0">January</option>
-        <option value="1">February</option>
-        <option value="2">March</option>
-        <option value="3">April</option>
-        <option value="4">May</option>
-        <option value="5">June</option>
-        <option value="6">July</option>
-        <option value="7">August</option>
-        <option value="8">September</option>
-        <option value="9">October</option>
-        <option value="10">November</option>
-        <option value="11">December</option>
-      </select>
-    </div>
-    <button onclick="clearFilters()" id="clearFiltersBtn" disabled>Clear Filters</button>
-  </div>
+    <section class="card filter-section" id="filterSection">
+      <h3 style="margin: 0; width: 100%; font-size:1.1rem;">Filter by Date of Death</h3>
+      <div class="filter-group">
+        <label for="yearFilter">Select Year</label>
+        <select id="yearFilter" onchange="updateMonthFilter()">
+          <option value="">All Years</option>
+        </select>
+      </div>
+      <div class="filter-group" id="monthFilterGroup" style="display: none;">
+        <label for="monthFilter">Select Month</label>
+        <select id="monthFilter" onchange="applyFilters()">
+          <option value="">All Months</option>
+          <option value="0">January</option>
+          <option value="1">February</option>
+          <option value="2">March</option>
+          <option value="3">April</option>
+          <option value="4">May</option>
+          <option value="5">June</option>
+          <option value="6">July</option>
+          <option value="7">August</option>
+          <option value="8">September</option>
+          <option value="9">October</option>
+          <option value="10">November</option>
+          <option value="11">December</option>
+        </select>
+      </div>
+      <button onclick="clearFilters()" id="clearFiltersBtn" disabled style="background-color: #6c757d;">Clear Filters</button>
+    </section>
 
-  <div id="dashboard"></div>
+    <main id="dashboard"></main>
+  </div>
 
   <script>
     let allData = []; // Store the original unfiltered data
@@ -175,7 +211,7 @@
         }
         
         allData = json; // Store the original data
-        document.getElementById('recordCount').textContent = `Loaded ${json.length} records`;
+        document.getElementById('recordCount').textContent = `✓ Loaded ${json.length} records`;
         
         // Show filter section and populate year filter
         document.getElementById('filterSection').style.display = 'flex';
@@ -321,7 +357,7 @@
       const dashboard = document.getElementById('dashboard');
       dashboard.innerHTML = '';
       if (data.length === 0) {
-        dashboard.innerHTML = '<p style="padding: 20px; color: #666;">No data matches the selected filters.</p>';
+        dashboard.innerHTML = '<p style="padding: 20px; color: #666; grid-column: 1/-1; text-align:center;">No data matches the selected filters.</p>';
         return;
       }
 
@@ -337,13 +373,14 @@
           : [{ x: labels, y: values, type, marker: { color: vibrantColors } }];
 
         const layout = {
-          title: { text: title },
-          plot_bgcolor: '#f5f7fa',
-          paper_bgcolor: '#ffffff',
-          font: { family: 'Segoe UI, Tahoma, Geneva, Verdana', color: '#333' }
+          title: { text: title, font: { family: 'Segoe UI', size: 16 } },
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          font: { family: 'Segoe UI, Tahoma, Geneva, Verdana', color: '#333' },
+          margin: { t: 50, b: 50, l: 50, r: 20 }
         };
 
-        Plotly.newPlot(id, trace, layout);
+        Plotly.newPlot(id, trace, layout, {responsive: true});
       };
 
       const groupBy = (arr, key) => {
@@ -372,36 +409,24 @@
         return result;
       };
 
-      // Updated monthlyCount function specifically for Reporting Date
       const monthlyCount = (arr, key) => {
         const result = {};
         const currentYear = new Date().getFullYear();
         
         arr.forEach(item => {
           if (!item[key]) return;
-          
           const date = parseDate(item[key]);
           if (isNaN(date)) return;
-          
-          // Skip dates that are clearly invalid (before 2000 or after current year + 1)
           const year = date.getFullYear();
           if (year < 2000 || year > currentYear + 1) return;
-          
           const label = `${date.toLocaleString('default', { month: 'short' })} ${year}`;
           result[label] = (result[label] || 0) + 1;
         });
         
-        // Sort by date
-        const sorted = Object.entries(result).sort((a, b) => {
-          const dateA = new Date(a[0]);
-          const dateB = new Date(b[0]);
-          return dateA - dateB;
-        });
-        
+        const sorted = Object.entries(result).sort((a, b) => new Date(a[0]) - new Date(b[0]));
         return [sorted.map(x => x[0]), sorted.map(x => x[1])];
       };
 
-      // Generate charts with corrected date handling
       const [reportLabels, reportValues] = monthlyCount(data, 'Reporting Date');
       addChart('Applications by Reporting Date', reportLabels, reportValues);
 
@@ -412,34 +437,23 @@
       const timeGapLabels = ['0-2 days', '3-7 days', '8-21 days', '22-30 days', '31-365 days', '365+ days'];
       addChart('Time Gap Distribution', timeGapLabels, bucketBy(data, 'Time Gap', timeGapBuckets));
 
-      const ageBuckets = [
-        [0, 1], [1, 5], [5, 15], [15, 25], [25, 35],
-        [35, 45], [45, 55], [55, 65], [65, 70], [70, null]
-      ];
-      const ageLabels = [
-        'Below 01', '01 to 04', '05 to 14', '15 to 24', '25 to 34',
-        '35 to 44', '45 to 54', '55 to 64', '65 to 69', '70 and above'
-      ];
+      const ageBuckets = [[0, 1], [1, 5], [5, 15], [15, 25], [25, 35], [35, 45], [45, 55], [55, 65], [65, 70], [70, null]];
+      const ageLabels = ['Below 01', '01-04', '05-14', '15-24', '25-34', '35-44', '45-54', '55-64', '65-69', '70+'];
       const ageValues = Array(ageLabels.length).fill(0);
       let notStated = 0;
       data.forEach(item => {
         const age = parseFloat(item['Age']);
-        if (isNaN(age)) {
-          notStated++;
-        } else {
+        if (isNaN(age)) { notStated++; } else {
           for (let i = 0; i < ageBuckets.length; i++) {
             const [min, max] = ageBuckets[i];
-            if (age >= min && (max === null || age < max)) {
-              ageValues[i]++;
-              break;
-            }
+            if (age >= min && (max === null || age < max)) { ageValues[i]++; break; }
           }
         }
       });
-      addChart('Age Distribution at Time of Death', [...ageLabels, 'Age not stated'], [...ageValues, notStated]);
+      addChart('Age Distribution', [...ageLabels, 'Not stated'], [...ageValues, notStated]);
 
       const genderGrouped = groupBy(data, 'Gender');
-      addChart('Gender Distribution of Deceased', Object.keys(genderGrouped), Object.values(genderGrouped), 'pie');
+      addChart('Gender Distribution', Object.keys(genderGrouped), Object.values(genderGrouped), 'pie');
 
       const religionGrouped = groupBy(data, 'Religion');
       addChart('Religion-wise Death Count', Object.keys(religionGrouped), Object.values(religionGrouped));
@@ -459,39 +473,8 @@
       const enteredByRole = groupBy(data, 'Data Entered by (Role)');
       addChart('Applications Entered by Role', Object.keys(enteredByRole), Object.values(enteredByRole));
 
-      const institutionGroup = {};
-      data.forEach(item => {
-        const place = item['Place of Death']?.trim();
-        if (place === 'Hospital') {
-          const desc = item['Description of Place of Death']?.trim() || 'Unknown Hospital';
-          institutionGroup[desc] = (institutionGroup[desc] || 0) + 1;
-        } else {
-          institutionGroup['Home Death Event'] = (institutionGroup['Home Death Event'] || 0) + 1;
-        }
-      });
-      addChart('Applications Entered by Institution', Object.keys(institutionGroup), Object.values(institutionGroup));
-
-      const causeGrouped = groupBy(data, 'Immediate Cause');
-      const topCauses = Object.entries(causeGrouped).sort((a, b) => b[1] - a[1]).slice(0, 10);
-      addChart('Top 10 Immediate Causes of Death', topCauses.map(x => x[0]), topCauses.map(x => x[1]));
-
-      const idProofType = groupBy(data, 'Type of ID Proof');
-      addChart('Type of ID Proof Submitted', Object.keys(idProofType), Object.values(idProofType));
-
-      const occupationGrouped = groupBy(data, 'Occupation');
-      addChart('Occupation of Deceased', Object.keys(occupationGrouped), Object.values(occupationGrouped));
-
       const statusGrouped = groupBy(data, 'Status');
-      addChart('Application Status Distribution', Object.keys(statusGrouped), Object.values(statusGrouped));
-
-      const missingFirstName = data.filter(d => !d['First Name']).length;
-      addChart('Missing First Name Count', ['Missing', 'Present'], [missingFirstName, data.length - missingFirstName]);
-
-      const idMissing = data.filter(d => !d['Type of ID Proof']).length;
-      addChart('Missing ID Proof Count', ['Missing', 'Present'], [idMissing, data.length - idMissing]);
-
-      const mannerGrouped = groupBy(data, 'Manner of Death');
-      addChart('Manner of Death', Object.keys(mannerGrouped), Object.values(mannerGrouped));
+      addChart('Application Status', Object.keys(statusGrouped), Object.values(statusGrouped));
     }
   </script>
 </body>
