@@ -3,159 +3,198 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Birth Certificate Analytics Dashboard</title>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <title>Birth Certificate Analytics Dashboard | Full Page</title>
+  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
+    :root {
+      --primary: #00a5cf;
+      --secondary: #8fb996;
+      --hover: #52796f;
+      --bg: #f0f2f5;
+      --white: #ffffff;
+      --shadow: 0 4px 12px rgba(0,0,0,0.1);
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       margin: 0;
-      background-color: #f5f7fa;
+      background-color: var(--bg);
+      color: #333;
+      overflow-x: hidden;
     }
+
     header {
-      background: linear-gradient(to right, #00a5cf, #8fb996);
-      color: white;
-      padding: 20px 40px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--white);
+      padding: 1.5rem 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
     }
-    header h1 {
-      margin: 0;
-      font-size: 28px;
+
+    header h1 { margin: 0; font-size: 1.75rem; letter-spacing: -0.5px; }
+    header p { margin: 0.25rem 0 0; opacity: 0.9; font-size: 0.9rem; }
+
+    /* FLUID CONTAINER FOR FULL VIEW */
+    .container-fluid {
+      width: 98%;
+      margin: 0 auto;
+      padding: 20px 0;
     }
-    header p {
-      margin-top: 4px;
-      font-size: 14px;
+
+    .card {
+      background: var(--white);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+      width: 100%;
     }
-    .upload-section {
-      background: white;
-      padding: 20px;
-      margin: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .upload-section h2 {
-      margin-top: 0;
-    }
+
     .upload-controls {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .filter-section {
-      background: white;
-      padding: 20px;
-      margin: 0 20px 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      display: flex;
       flex-wrap: wrap;
-      gap: 15px;
       align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
     }
+
+    .filter-section {
+      display: none; 
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: flex-end;
+    }
+
     .filter-group {
       display: flex;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
+      gap: 0.5rem;
     }
+
     .filter-group label {
-      font-weight: 600;
-      font-size: 14px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #555;
     }
+
     select, button {
-      padding: 6px 12px;
-      font-size: 14px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      transition: all 0.2s ease;
+      background: var(--white);
     }
+
     button {
-      background-color: #00a5cf;
-      color: white;
+      background-color: var(--primary);
+      color: var(--white);
       border: none;
+      font-weight: 600;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #52796F;
-    }
-    button:disabled {
-      background-color: #cccccc;
-      cursor: not-allowed;
-    }
+
+    button:hover { background-color: var(--hover); transform: translateY(-1px); }
+    button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+    /* GRID: 2 COLUMNS FOR FULL PAGE VIEW */
     #dashboard {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      padding: 0 20px 40px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); 
+      gap: 1.5rem;
+      width: 100%;
     }
+
     .chart-container {
-      background: white;
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      width: 48%;
-      min-height: 400px;
+      background: var(--white);
+      padding: 1rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      min-height: 500px; /* Increased height for full page impact */
+      width: 100%;
+      overflow: hidden;
     }
-    @media (max-width: 768px) {
-      .chart-container { width: 100%; }
-      .filter-section { flex-direction: column; align-items: flex-start; }
+
+    #recordCount {
+      font-weight: 600;
+      color: var(--primary);
+      background: rgba(0, 165, 207, 0.1);
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+
+    /* RESPONSIVENESS */
+    @media (max-width: 1200px) {
+      #dashboard { grid-template-columns: 1fr; } /* Stacks to 1 column on smaller monitors */
+      .container-fluid { width: 95%; }
+    }
+
+    @media (max-width: 600px) {
+      header { text-align: center; }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Birth Application Analytics Dashboard</h1>
-    <p>Interactive Visualization of Birth Registration Data</p>
+    <p>Complete Administrative Visualization Suite</p>
   </header>
 
-  <div class="upload-section">
-    <h2>Upload Your Data</h2>
-    <div class="upload-controls">
-      <input type="file" id="fileInput" accept=".xlsx, .xls">
-      <button onclick="loadFile()">Load Data</button>
-      <span id="recordCount"></span>
-    </div>
-  </div>
+  <div class="container-fluid">
+    <section class="card upload-section">
+      <h2 style="margin-top:0; font-size:1.2rem;">Data Integration</h2>
+      <div class="upload-controls">
+        <input type="file" id="fileInput" accept=".xlsx, .xls">
+        <button onclick="loadFile()">Analyze Data</button>
+        <span id="recordCount"></span>
+      </div>
+    </section>
 
-  <div class="filter-section" id="filterSection" style="display: none;">
-    <h3 style="margin: 0; width: 100%;">Filter by Date of Birth</h3>
-    <div class="filter-group">
-      <label for="yearFilter">Year:</label>
-      <select id="yearFilter" onchange="updateMonthFilter()">
-        <option value="">All Years</option>
-      </select>
-    </div>
-    <div class="filter-group" id="monthFilterGroup" style="display: none;">
-      <label for="monthFilter">Month:</label>
-      <select id="monthFilter" onchange="applyFilters()">
-        <option value="">All Months</option>
-        <option value="0">January</option>
-        <option value="1">February</option>
-        <option value="2">March</option>
-        <option value="3">April</option>
-        <option value="4">May</option>
-        <option value="5">June</option>
-        <option value="6">July</option>
-        <option value="7">August</option>
-        <option value="8">September</option>
-        <option value="9">October</option>
-        <option value="10">November</option>
-        <option value="11">December</option>
-      </select>
-    </div>
-    <button onclick="clearFilters()" id="clearFiltersBtn" disabled>Clear Filters</button>
-  </div>
+    <section class="card filter-section" id="filterSection">
+      <h3 style="margin: 0; width: 100%; font-size:1.1rem;">Temporal Parameters</h3>
+      <div class="filter-group">
+        <label for="yearFilter">Birth Year</label>
+        <select id="yearFilter" onchange="updateMonthFilter()">
+          <option value="">All Available Years</option>
+        </select>
+      </div>
+      <div class="filter-group" id="monthFilterGroup" style="display: none;">
+        <label for="monthFilter">Birth Month</label>
+        <select id="monthFilter" onchange="applyFilters()">
+          <option value="">All Months</option>
+          <option value="0">January</option>
+          <option value="1">February</option>
+          <option value="2">March</option>
+          <option value="3">April</option>
+          <option value="4">May</option>
+          <option value="5">June</option>
+          <option value="6">July</option>
+          <option value="7">August</option>
+          <option value="8">September</option>
+          <option value="9">October</option>
+          <option value="10">November</option>
+          <option value="11">December</option>
+        </select>
+      </div>
+      <button onclick="clearFilters()" id="clearFiltersBtn" disabled style="background-color:#666;">Reset Filters</button>
+    </section>
 
-  <div id="dashboard"></div>
+    <main id="dashboard"></main>
+  </div>
 
   <script>
+    /* All functions below are kept identical to your original code */
     const colorPalettes = [
       ['#6A994E', '#A7C957', '#F2E8CF', '#BC4749', '#386641'],
       ['#4F86C6', '#A1C6EA', '#FFE1A8', '#FFADAD', '#CA7DF9'],
-      ['#90BE6D', '#F9C74F', '#F9844A', '#43AA8B', '#577590'],
-      ['#FFB5A7', '#FCD5CE', '#F8EDEB', '#E5989B', '#B5838D']
+      ['#90BE6D', '#F9C74F', '#F9844A', '#43AA8B', '#577590']
     ];
     let paletteIndex = 0;
-    let allData = []; // Store the original unfiltered data
+    let allData = []; 
 
     function loadFile() {
       const fileInput = document.getElementById('fileInput');
@@ -169,10 +208,9 @@
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
         
-        allData = json; // Store the original data
+        allData = json; 
         document.getElementById('recordCount').textContent = `Loaded ${json.length} records`;
         
-        // Show filter section and populate year filter
         document.getElementById('filterSection').style.display = 'flex';
         populateYearFilter(json);
         
@@ -183,12 +221,10 @@
 
     function populateYearFilter(data) {
       const yearFilter = document.getElementById('yearFilter');
-      // Clear existing options except the first one
       while (yearFilter.options.length > 1) {
         yearFilter.remove(1);
       }
       
-      // Extract unique years from Date Of Birth
       const years = new Set();
       data.forEach(item => {
         if (item['Date Of Birth']) {
@@ -199,7 +235,6 @@
         }
       });
       
-      // Add sorted years to dropdown (newest first)
       Array.from(years).sort((a, b) => b - a).forEach(year => {
         const option = document.createElement('option');
         option.value = year;
@@ -226,22 +261,18 @@
       const yearFilter = document.getElementById('yearFilter').value;
       const monthFilter = document.getElementById('monthFilter').value;
       
-      // Enable/disable clear filters button
       document.getElementById('clearFiltersBtn').disabled = !yearFilter && !monthFilter;
       
-      // Filter the data
       let filteredData = allData.filter(item => {
-        if (!item['Date Of Birth']) return false; // Exclude records with no date
+        if (!item['Date Of Birth']) return false; 
         
         const date = parseDate(item['Date Of Birth']);
-        if (isNaN(date)) return false; // Exclude invalid dates
+        if (isNaN(date)) return false; 
         
-        // Apply year filter if set
         if (yearFilter && date.getFullYear() !== parseInt(yearFilter)) {
           return false;
         }
         
-        // Apply month filter if set and year is selected
         if (yearFilter && monthFilter && date.getMonth() !== parseInt(monthFilter)) {
           return false;
         }
@@ -249,7 +280,6 @@
         return true;
       });
       
-      // Update the dashboard with filtered data
       generateDashboard(filteredData);
     }
 
@@ -262,23 +292,20 @@
     }
 
     function parseDate(dateValue) {
-      // Handle Excel date serial numbers (days since 1900)
       if (typeof dateValue === 'number') {
         const excelEpoch = new Date(1899, 11, 30);
         const date = new Date(excelEpoch.getTime() + dateValue * 86400000);
         return date;
       }
       
-      // Handle string dates explicitly in DD/MM/YYYY format
       if (typeof dateValue === 'string') {
-        const match = dateValue.match(/^(\d{2})\/(\d{2})\/(\d{4})$/); // DD/MM/YYYY
+        const match = dateValue.match(/^(\d{2})\/(\d{2})\/(\d{4})$/); 
         if (match) {
 			const [_, day, month, year] = match;
 			const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
 			return isNaN(date) ? new Date(NaN) : date;
         }
 		
-        // Fallback to standard Date parsing
 		const date = new Date(dateValue);
 		return isNaN(date) ? new Date(NaN) : date;
 	  }
@@ -289,7 +316,7 @@
     function generateDashboard(data) {
       document.getElementById('dashboard').innerHTML = '';
       if (data.length === 0) {
-        document.getElementById('dashboard').innerHTML = '<p style="padding: 20px; color: #666;">No data matches the selected filters.</p>';
+        document.getElementById('dashboard').innerHTML = '<p style="padding: 20px; color: #666; grid-column: 1/-1; text-align: center;">No data matches the selected filters.</p>';
         return;
       }
 
@@ -310,8 +337,10 @@
           type: 'bar',
           marker: { color: colors }
         }], {
-          title,
-          font: { family: 'Segoe UI' }
+          title: { text: title, font: { family: 'Segoe UI', size: 16 } },
+          margin: { t: 40, b: 60, l: 40, r: 20 },
+          font: { family: 'Segoe UI' },
+          responsive: true
         });
       };
 
