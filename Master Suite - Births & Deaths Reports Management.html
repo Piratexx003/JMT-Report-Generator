@@ -1,0 +1,2761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Suite - Births & Deaths Reports Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --nav-bg: #1e293b;
+            --nav-text: #f8fafc;
+            --active-accent: #3b82f6;
+            --sidebar-width: 280px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            display: flex; 
+            height: 100vh; 
+            background: #f1f5f9; 
+            overflow: hidden; 
+        }
+
+        /* Sidebar Navigation */
+        nav {
+            width: var(--sidebar-width);
+            background: var(--nav-bg);
+            color: var(--nav-text);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .nav-header { 
+            padding: 25px 20px; 
+            text-align: center; 
+            border-bottom: 1px solid #334155; 
+        }
+        
+        .nav-header h2 { 
+            font-size: 1.1rem; 
+            font-weight: 700; 
+            color: #60a5fa; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
+
+        .nav-links { 
+            flex: 1; 
+            padding: 15px 0; 
+            overflow-y: auto; 
+        }
+        
+        .nav-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover { background: #334155; color: white; }
+        .nav-item.active {
+            background: #0f172a;
+            color: white;
+            border-left-color: var(--active-accent);
+        }
+
+        .nav-item i { width: 22px; text-align: center; font-size: 1.1rem; }
+
+        /* Main Viewport */
+        main { 
+            flex: 1; 
+            position: relative; 
+            height: 100vh; 
+            background: #ffffff; 
+        }
+        
+        iframe { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+            display: none; 
+        }
+        
+        iframe.active { display: block; }
+
+        /* Welcome Screen */
+        #welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #64748b;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #welcome-screen i {
+            font-size: 4rem;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-header">
+            <h2><i class="fas fa-server"></i> Master Suite - Births & Deaths Reports Management</h2>
+            <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 5px;">Unified Rreports Master</p>
+        </div>
+        <div class="nav-links">
+            <div class="nav-item" onclick="loadApp(0, this)">
+                <i class="fas fa-baby"></i> <span>Birth: Gap & Reject</span>
+            </div>
+            <div class="nav-item" onclick="loadApp(1, this)">
+                <i class="fas fa-book-dead"></i> <span>Death: Gap & Reject</span>
+            </div>
+            <div class="nav-item" onclick="loadApp(2, this)">
+                <i class="fas fa-chart-line"></i> <span>Birth Dashboard</span>
+            </div>
+            <div class="nav-item" onclick="loadApp(3, this)">
+                <i class="fas fa-chart-pie"></i> <span>Death Dashboard</span>
+            </div>
+            <div class="nav-item" onclick="loadApp(5, this)">
+                <i class="fas fa-file-medical"></i> <span>Birth Report Gen</span>
+            </div>
+            <div class="nav-item" onclick="loadApp(4, this)">
+                <i class="fas fa-file-export"></i> <span>Death Report Gen</span>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-viewport">
+        <div id="welcome-screen">
+            <i class="fas fa-layer-group"></i>
+            <h1>Ready to Work</h1>
+            <p>Select an application from the sidebar to begin.</p>
+        </div>
+        
+        <iframe id="main-frame" class="active"></iframe>
+    </main>
+
+    <script>
+        function loadApp(index, element) {
+            // Update Active Menu State
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            if(element) element.classList.add('active');
+
+            // Hide welcome screen and show the iframe
+            document.getElementById('welcome-screen').style.display = 'none';
+            const frame = document.getElementById('main-frame');
+            frame.style.display = 'block';
+
+            // Get the raw HTML code from the hidden textareas and inject it
+            const rawCode = document.getElementById('app-' + index).value;
+            frame.srcdoc = rawCode;
+        }
+    </script>
+
+    <textarea id="app-0" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Gap Add & Reject Remove - Birth Application</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root { --primary: #4a6fa5; --accent: #ff7e5f; --bg: #f5f7fa; --radius: 12px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; border-top: 6px solid var(--primary); }
+        header { padding: 30px; text-align: center; }
+        header h1 {
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .upload-area { border: 2px dashed #cbd5e0; margin: 0 30px 30px; padding: 40px; border-radius: var(--radius); text-align: center; cursor: pointer; transition: 0.3s; }
+        .upload-area:hover { border-color: var(--accent); background: #fffaf9; }
+        .btn { padding: 12px 25px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s; }
+        #processBtn { background: var(--accent); color: white; width: 220px; justify-content: center; }
+        #processBtn:disabled { background: #ccc; cursor: not-allowed; }
+        #downloadBtn { background: var(--primary); color: white; width: 100%; display: none; margin-top: 20px; }
+        .progress-container { margin: 20px 30px; display: none; }
+        .progress-bar { width: 100%; height: 10px; background: #edf2f7; border-radius: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+        .status-text { font-size: 0.85rem; margin-top: 5px; color: #666; text-align: center; }
+        .results { padding: 30px; }
+        .file-card { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--primary); font-size: 0.9rem; }
+        .stat-badge { display: inline-block; padding: 2px 8px; background: #e2e8f0; border-radius: 4px; font-size: 0.75rem; margin: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1><i class="fas fa-baby"></i> Time Gap Add & Reject Remove - Birth Application</h1>
+    </header>
+
+    <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <i class="fas fa-file-excel fa-3x" style="color: var(--primary); margin-bottom: 15px;"></i>
+        <p id="fileNames">Click to select files</p>
+        <input type="file" id="fileInput" accept=".xlsx" multiple style="display:none">
+    </div>
+
+    <div style="text-align: center; margin-bottom: 30px;">
+        <button id="processBtn" disabled><i class="fas fa-cogs"></i> Process Files</button>
+    </div>
+
+    <div class="progress-container" id="progressArea">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <p class="status-text" id="statusText">Ready...</p>
+    </div>
+
+    <div id="results" class="results" style="display:none;">
+        <div id="statsList"></div>
+        <button id="downloadBtn" class="btn"><i class="fas fa-download"></i> Download Processed Batch</button>
+    </div>
+</div>
+
+<script>
+    let filesMap = new Map();
+    let processedMap = new Map();
+    let statsMap = new Map();
+
+    const fileInput = document.getElementById('fileInput');
+    const processBtn = document.getElementById('processBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const progressArea = document.getElementById('progressArea');
+    const progressFill = document.getElementById('progressFill');
+    const statusText = document.getElementById('statusText');
+
+    function getJsDate(val) {
+        if (!val) return null;
+        if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+        if (typeof val === 'number') {
+            return new Date(Math.round((val - 25569) * 86400 * 1000));
+        }
+        if (typeof val === 'string') {
+            const parts = val.split(/[\/\-]/);
+            if (parts.length === 3) {
+                const d = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10) - 1;
+                const y = parseInt(parts[2], 10);
+                const date = new Date(y, m, d);
+                return isNaN(date.getTime()) ? null : date;
+            }
+        }
+        return null;
+    }
+
+    fileInput.addEventListener('change', async () => {
+        const files = Array.from(fileInput.files);
+        if (files.length === 0) return;
+        filesMap.clear();
+        document.getElementById('fileNames').innerHTML = `<b>${files.length}</b> files loaded`;
+        
+        await Promise.all(files.map(file => {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+                    filesMap.set(file.name, wb);
+                    resolve();
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }));
+        processBtn.disabled = false;
+    });
+
+    processBtn.addEventListener('click', async () => {
+        processBtn.disabled = true;
+        progressArea.style.display = 'block';
+        processedMap.clear();
+        statsMap.clear();
+
+        const entries = Array.from(filesMap.entries());
+        for(let i=0; i < entries.length; i++) {
+            const [name, wb] = entries[i];
+            statusText.textContent = `Processing: ${name}`;
+            const result = await processWorkbook(wb);
+            processedMap.set(name, result.wb);
+            statsMap.set(name, result.stats);
+            progressFill.style.width = ((i + 1) / entries.length * 100) + '%';
+            await new Promise(r => setTimeout(r, 10)); 
+        }
+
+        renderStats();
+        document.getElementById('results').style.display = 'block';
+        downloadBtn.style.display = 'inline-flex';
+        statusText.textContent = "Processing Finished!";
+        processBtn.disabled = false;
+    });
+
+    async function processWorkbook(workbook) {
+        const stats = {};
+        const newWb = XLSX.utils.book_new();
+
+        for (const sheetName of workbook.SheetNames) {
+            const ws = workbook.Sheets[sheetName];
+            let data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+            if (data.length < 2) continue;
+
+            const headers = data[0].map(h => String(h || "").trim());
+            const idx = {
+                dob: headers.indexOf('Date Of Birth'),
+                rep: headers.findIndex(h => h.toLowerCase().includes('reporting date') || h.toLowerCase().includes('entry date')),
+                status: headers.indexOf('Status'),
+                role: headers.indexOf('Data Entered by (Role)'),
+                type: headers.indexOf('Appl Type')
+            };
+
+            if (idx.rep === -1) idx.rep = 0; 
+            headers.splice(idx.dob + 1, 0, "Time Gap");
+
+            const processedRows = data.slice(1).map(row => {
+                const status = String(row[idx.status] || "").trim().toUpperCase();
+                const role = String(row[idx.role] || "").trim().toUpperCase();
+
+                // REMOVE LOGIC: CITIZEN + APPLICATION SUBMITTED or REJECTED
+                if (role === 'CITIZEN' && (status === 'APPLICATION SUBMITTED' || status === 'REJECTED')) {
+                    return null;
+                }
+
+                // REMOVE LOGIC: DEO ROLES + REJECTED
+                const deoRoles = ['GOVTHOSPITALDEO', 'PVTHOSPITALDEO', 'PANCHAYATDEO', 'ULBDEO'];
+                if (deoRoles.includes(role) && status === 'REJECTED') {
+                    return null;
+                }
+
+                const dobDate = getJsDate(row[idx.dob]);
+                const repDate = getJsDate(row[idx.rep]);
+
+                let gap = "";
+                if (dobDate && repDate) {
+                    const d1 = new Date(dobDate.getFullYear(), dobDate.getMonth(), dobDate.getDate());
+                    const d2 = new Date(repDate.getFullYear(), repDate.getMonth(), repDate.getDate());
+                    gap = Math.floor((d2 - d1) / 86400000);
+                }
+
+                const year = dobDate ? dobDate.getFullYear() : "Unknown";
+                const type = row[idx.type] || "Others";
+                if(!stats[year]) stats[year] = {};
+                stats[year][type] = (stats[year][type] || 0) + 1;
+
+                const formattedRow = [...row];
+                formattedRow[idx.dob] = dobDate ? `${String(dobDate.getDate()).padStart(2,'0')}/${String(dobDate.getMonth()+1).padStart(2,'0')}/${dobDate.getFullYear()}` : row[idx.dob];
+                formattedRow.splice(idx.dob + 1, 0, gap);
+                return formattedRow;
+            }).filter(r => r !== null);
+
+            processedRows.sort((a, b) => {
+                const da = getJsDate(a[idx.dob]) || new Date(0);
+                const db = getJsDate(b[idx.dob]) || new Date(0);
+                return da - db;
+            });
+
+            XLSX.utils.book_append_sheet(newWb, XLSX.utils.aoa_to_sheet([headers, ...processedRows]), sheetName);
+        }
+        return { wb: newWb, stats };
+    }
+
+    downloadBtn.addEventListener('click', async () => {
+        downloadBtn.disabled = true;
+        const entries = Array.from(processedMap.entries());
+        
+        for (let i = 0; i < entries.length; i++) {
+            const [name, wb] = entries[i];
+            statusText.textContent = `Downloading (${i+1}/${entries.length}): ${name}`;
+            XLSX.writeFile(wb, name.replace('.xlsx', '_processed.xlsx'));
+            if (i < entries.length - 1) {
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        }
+        
+        statusText.textContent = "All files saved!";
+        downloadBtn.disabled = false;
+    });
+
+    function renderStats() {
+        const out = document.getElementById('statsList');
+        out.innerHTML = '';
+        statsMap.forEach((stats, name) => {
+            let html = `<div class="file-card"><strong>${name}</strong><br>`;
+            Object.keys(stats).sort().reverse().forEach(year => {
+                html += `<div style="margin-top:4px;">${year}: `;
+                for(let type in stats[year]) {
+                    html += `<span class="stat-badge">${type}: ${stats[year][type]}</span>`;
+                }
+                html += `</div>`;
+            });
+            out.innerHTML += html + `</div>`;
+        });
+    }
+</script>
+</body>
+</html>
+</textarea>
+
+<textarea id="app-1" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Gap Add & Reject Remove - Death Application</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        :root { 
+            --primary: #4a6fa5; 
+            --accent: #ff7e5f; 
+            --bg: #f5f7fa; 
+            --radius: 12px; 
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: var(--bg); 
+            padding: 20px; 
+            color: #333; 
+        }
+
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: var(--radius); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            overflow: hidden; 
+            border-top: 6px solid var(--primary); 
+        }
+
+        header { padding: 30px; text-align: center; }
+
+        header h1 {
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .upload-area { 
+            border: 2px dashed #cbd5e0; 
+            margin: 0 30px 30px; 
+            padding: 40px; 
+            border-radius: var(--radius); 
+            text-align: center; 
+            cursor: pointer; 
+            transition: 0.3s; 
+        }
+
+        .upload-area:hover { border-color: var(--accent); background: #fffaf9; }
+
+        .btn { 
+            padding: 12px 25px; 
+            border-radius: 8px; 
+            border: none; 
+            font-weight: 600; 
+            cursor: pointer; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 10px; 
+            transition: 0.3s; 
+        }
+
+        #processBtn { 
+            background: var(--accent); 
+            color: white; 
+            width: 220px; 
+            justify-content: center; 
+        }
+
+        #processBtn:disabled { background: #ccc; cursor: not-allowed; }
+
+        #downloadBtn { 
+            background: var(--primary); 
+            color: white; 
+            width: 100%; 
+            display: none; 
+            margin-top: 20px; 
+        }
+
+        .progress-container { margin: 20px 30px; display: none; }
+        
+        .progress-bar { 
+            width: 100%; 
+            height: 10px; 
+            background: #edf2f7; 
+            border-radius: 5px; 
+            overflow: hidden; 
+        }
+
+        .progress-fill { 
+            height: 100%; 
+            background: var(--accent); 
+            width: 0%; 
+            transition: width 0.3s; 
+        }
+
+        .status-text { 
+            font-size: 0.85rem; 
+            margin-top: 5px; 
+            color: #666; 
+            text-align: center; 
+        }
+
+        .results { padding: 30px; }
+
+        .file-card { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            border-left: 4px solid var(--primary); 
+            font-size: 0.9rem; 
+        }
+
+        .stat-badge { 
+            display: inline-block; 
+            padding: 2px 8px; 
+            background: #e2e8f0; 
+            border-radius: 4px; 
+            font-size: 0.75rem; 
+            margin: 2px; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1><i class="fas fa-book-dead"></i> Time Gap Add & Reject Remove - Death Application</h1>
+    </header>
+
+    <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <i class="fas fa-file-excel fa-3x" style="color: var(--primary); margin-bottom: 15px;"></i>
+        <p id="fileNames">Click to select files</p>
+        <input type="file" id="fileInput" accept=".xlsx" multiple style="display:none">
+    </div>
+
+    <div style="text-align: center; margin-bottom: 30px;">
+        <button id="processBtn" disabled><i class="fas fa-cogs"></i> Process Files</button>
+    </div>
+
+    <div class="progress-container" id="progressArea">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <p class="status-text" id="statusText">Ready...</p>
+    </div>
+
+    <div id="results" class="results" style="display:none;">
+        <div id="statsList"></div>
+        <button id="downloadBtn" class="btn"><i class="fas fa-download"></i> Download Processed Batch</button>
+    </div>
+</div>
+
+<script>
+    let filesMap = new Map();
+    let processedMap = new Map();
+    let statsMap = new Map();
+
+    const fileInput = document.getElementById('fileInput');
+    const processBtn = document.getElementById('processBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const progressArea = document.getElementById('progressArea');
+    const progressFill = document.getElementById('progressFill');
+    const statusText = document.getElementById('statusText');
+
+    function getJsDate(val) {
+        if (!val) return null;
+        if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+        if (typeof val === 'number') {
+            return new Date(Math.round((val - 25569) * 86400 * 1000));
+        }
+        if (typeof val === 'string') {
+            const parts = val.split(/[\/\-]/);
+            if (parts.length === 3) {
+                const d = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10) - 1;
+                const y = parseInt(parts[2], 10);
+                return new Date(y, m, d);
+            }
+        }
+        return null;
+    }
+
+    fileInput.addEventListener('change', async () => {
+        const files = Array.from(fileInput.files);
+        if (files.length === 0) return;
+        filesMap.clear();
+        document.getElementById('fileNames').innerHTML = `<b>${files.length}</b> files loaded`;
+        
+        await Promise.all(files.map(file => {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+                    filesMap.set(file.name, wb);
+                    resolve();
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }));
+        processBtn.disabled = false;
+    });
+
+    processBtn.addEventListener('click', async () => {
+        processBtn.disabled = true;
+        progressArea.style.display = 'block';
+        processedMap.clear();
+        statsMap.clear();
+
+        const entries = Array.from(filesMap.entries());
+        for(let i=0; i < entries.length; i++) {
+            const [name, wb] = entries[i];
+            statusText.textContent = `Processing: ${name}`;
+            const result = await processWorkbook(wb);
+            processedMap.set(name, result.wb);
+            statsMap.set(name, result.deathStats);
+            progressFill.style.width = ((i + 1) / entries.length * 100) + '%';
+            await new Promise(r => setTimeout(r, 10)); 
+        }
+
+        renderStats();
+        document.getElementById('results').style.display = 'block';
+        downloadBtn.style.display = 'inline-flex';
+        statusText.textContent = "Processing Finished!";
+        processBtn.disabled = false;
+    });
+
+    async function processWorkbook(workbook) {
+        const deathStats = {};
+        const newWb = XLSX.utils.book_new();
+
+        for (const sheetName of workbook.SheetNames) {
+            const ws = workbook.Sheets[sheetName];
+            let data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+            if (data.length < 2) continue;
+
+            const headers = data[0].map(h => String(h || "").trim());
+            const idx = {
+                dod: headers.indexOf('Date Of Death'),
+                rep: headers.findIndex(h => h.toLowerCase().includes('reporting date') || h.toLowerCase().includes('entry date')),
+                status: headers.indexOf('Status'),
+                role: headers.indexOf('Data Entered by (Role)'),
+                place: headers.indexOf('Place of Death'),
+                desc: headers.indexOf('Description of Place of death'),
+                type: headers.findIndex(h => h.toLowerCase().includes('appl type') || h.toLowerCase().includes('application type'))
+            };
+
+            if (idx.rep === -1) idx.rep = 0; 
+            headers.splice(idx.dod + 1, 0, "Time Gap");
+
+            const processedRows = data.slice(1).map(row => {
+                const status = String(row[idx.status] || "").trim();
+                const role = String(row[idx.role] || "").trim();
+
+                // Citizen Specific Removal logic
+                if (role.toUpperCase() === 'CITIZEN' && status.toUpperCase() === 'APPLICATION SUBMITTED') {
+                    return null;
+                }
+
+                // General Removal logic (Rejected/Application Submitted)
+                if (status === 'Rejected' || status === 'Application Submitted') {
+                    if (role === 'Citizen') return null;
+                    if (['GovtHospitalDEO', 'PvtHospitalDEO', 'PanchayatDEO', 'UlbDEO'].includes(role) && status === 'Rejected') return null;
+                }
+
+                const dodDate = getJsDate(row[idx.dod]);
+                const repDate = getJsDate(row[idx.rep]);
+
+                let gap = "";
+                if (dodDate && repDate) {
+                    const d1 = new Date(dodDate.getFullYear(), dodDate.getMonth(), dodDate.getDate());
+                    const d2 = new Date(repDate.getFullYear(), repDate.getMonth(), repDate.getDate());
+                    gap = Math.floor((d2 - d1) / 86400000);
+                }
+
+                const year = dodDate ? dodDate.getFullYear() : "Unknown";
+                if(!deathStats[year]) deathStats[year] = { hospital: {}, home: {}, types: {} };
+                
+                const place = String(row[idx.place] || "").toLowerCase();
+                const desc = String(row[idx.desc] || "Not Specified");
+                const type = row[idx.type] !== -1 ? String(row[idx.type] || "Others") : "Others";
+
+                deathStats[year].types[type] = (deathStats[year].types[type] || 0) + 1;
+
+                if (place.includes('hospital')) {
+                    deathStats[year].hospital[desc] = (deathStats[year].hospital[desc] || 0) + 1;
+                } else if (place.includes('home') || place.includes('house')) {
+                    deathStats[year].home[desc] = (deathStats[year].home[desc] || 0) + 1;
+                }
+
+                const formattedRow = [...row];
+                formattedRow[idx.dod] = dodDate ? `${String(dodDate.getDate()).padStart(2,'0')}/${String(dodDate.getMonth()+1).padStart(2,'0')}/${dodDate.getFullYear()}` : row[idx.dod];
+                formattedRow.splice(idx.dod + 1, 0, gap);
+                return formattedRow;
+            }).filter(r => r !== null);
+
+            processedRows.sort((a, b) => {
+                const da = getJsDate(a[idx.dod]) || new Date(0);
+                const db = getJsDate(b[idx.dod]) || new Date(0);
+                return da - db;
+            });
+
+            XLSX.utils.book_append_sheet(newWb, XLSX.utils.aoa_to_sheet([headers, ...processedRows]), sheetName);
+        }
+        return { wb: newWb, deathStats };
+    }
+
+    downloadBtn.addEventListener('click', async () => {
+        downloadBtn.disabled = true;
+        const entries = Array.from(processedMap.entries());
+        
+        for (let i = 0; i < entries.length; i++) {
+            const [name, wb] = entries[i];
+            statusText.textContent = `Downloading (${i+1}/${entries.length}): ${name}`;
+            XLSX.writeFile(wb, name.replace('.xlsx', '_processed.xlsx'));
+            if (i < entries.length - 1) {
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        }
+        
+        statusText.textContent = "All files saved!";
+        downloadBtn.disabled = false;
+    });
+
+    function renderStats() {
+        const out = document.getElementById('statsList');
+        out.innerHTML = '';
+        statsMap.forEach((stats, name) => {
+            let html = `<div class="file-card"><strong><i class="fas fa-file-excel"></i> ${name}</strong><br>`;
+            Object.keys(stats).sort().reverse().forEach(year => {
+                html += `<div style="margin-top:10px; font-weight:600; color:var(--primary);"><i class="fas fa-calendar-alt"></i> ${year}</div>`;
+                
+                if (Object.keys(stats[year].types).length > 0) {
+                    html += `<div style="margin-left:15px; font-size:0.8rem; color:#666; margin-top:5px;">Application Types:</div>`;
+                    for (let type in stats[year].types) {
+                        html += `<span class="stat-badge">${type}: ${stats[year].types[type]}</span>`;
+                    }
+                }
+
+                if (Object.keys(stats[year].hospital).length > 0) {
+                    html += `<div style="margin-left:15px; font-size:0.8rem; color:#666; margin-top:5px;">Hospital Death Descriptions:</div>`;
+                    for (let desc in stats[year].hospital) {
+                        html += `<span class="stat-badge">${desc}: ${stats[year].hospital[desc]}</span>`;
+                    }
+                }
+                if (Object.keys(stats[year].home).length > 0) {
+                    html += `<div style="margin-left:15px; font-size:0.8rem; color:#666; margin-top:5px;">Home Death Descriptions:</div>`;
+                    for (let desc in stats[year].home) {
+                        html += `<span class="stat-badge">${desc}: ${stats[year].home[desc]}</span>`;
+                    }
+                }
+            });
+            out.innerHTML += html + `</div>`;
+        });
+    }
+</script>
+</body>
+</html>
+</textarea>
+
+<textarea id="app-2" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Birth Certificate Analytics Dashboard | Full Page</title>
+  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary: #00a5cf;
+      --secondary: #8fb996;
+      --hover: #52796f;
+      --bg: #f0f2f5;
+      --white: #ffffff;
+      --shadow: 0 4px 12px rgba(0,0,0,0.1);
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      background-color: var(--bg);
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--white);
+      padding: 1.5rem 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+    }
+
+    header h1 { margin: 0; font-size: 1.75rem; letter-spacing: -0.5px; }
+    header p { margin: 0.25rem 0 0; opacity: 0.9; font-size: 0.9rem; }
+
+    /* FLUID CONTAINER FOR FULL VIEW */
+    .container-fluid {
+      width: 98%;
+      margin: 0 auto;
+      padding: 20px 0;
+    }
+
+    .card {
+      background: var(--white);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+      width: 100%;
+    }
+
+    .upload-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .filter-section {
+      display: none; 
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: flex-end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .filter-group label {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    select, button {
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      transition: all 0.2s ease;
+      background: var(--white);
+    }
+
+    button {
+      background-color: var(--primary);
+      color: var(--white);
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover { background-color: var(--hover); transform: translateY(-1px); }
+    button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+    /* GRID: 2 COLUMNS FOR FULL PAGE VIEW */
+    #dashboard {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); 
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .chart-container {
+      background: var(--white);
+      padding: 1rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      min-height: 500px; /* Increased height for full page impact */
+      width: 100%;
+      overflow: hidden;
+    }
+
+    #recordCount {
+      font-weight: 600;
+      color: var(--primary);
+      background: rgba(0, 165, 207, 0.1);
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+
+    /* RESPONSIVENESS */
+    @media (max-width: 1200px) {
+      #dashboard { grid-template-columns: 1fr; } /* Stacks to 1 column on smaller monitors */
+      .container-fluid { width: 95%; }
+    }
+
+    @media (max-width: 600px) {
+      header { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Birth Application Analytics Dashboard</h1>
+    <p>Complete Administrative Visualization Suite</p>
+  </header>
+
+  <div class="container-fluid">
+    <section class="card upload-section">
+      <h2 style="margin-top:0; font-size:1.2rem;">Data Integration</h2>
+      <div class="upload-controls">
+        <input type="file" id="fileInput" accept=".xlsx, .xls">
+        <button onclick="loadFile()">Analyze Data</button>
+        <span id="recordCount"></span>
+      </div>
+    </section>
+
+    <section class="card filter-section" id="filterSection">
+      <h3 style="margin: 0; width: 100%; font-size:1.1rem;">Temporal Parameters</h3>
+      <div class="filter-group">
+        <label for="yearFilter">Birth Year</label>
+        <select id="yearFilter" onchange="updateMonthFilter()">
+          <option value="">All Available Years</option>
+        </select>
+      </div>
+      <div class="filter-group" id="monthFilterGroup" style="display: none;">
+        <label for="monthFilter">Birth Month</label>
+        <select id="monthFilter" onchange="applyFilters()">
+          <option value="">All Months</option>
+          <option value="0">January</option>
+          <option value="1">February</option>
+          <option value="2">March</option>
+          <option value="3">April</option>
+          <option value="4">May</option>
+          <option value="5">June</option>
+          <option value="6">July</option>
+          <option value="7">August</option>
+          <option value="8">September</option>
+          <option value="9">October</option>
+          <option value="10">November</option>
+          <option value="11">December</option>
+        </select>
+      </div>
+      <button onclick="clearFilters()" id="clearFiltersBtn" disabled style="background-color:#666;">Reset Filters</button>
+    </section>
+
+    <main id="dashboard"></main>
+  </div>
+
+  <script>
+    /* All functions below are kept identical to your original code */
+    const colorPalettes = [
+      ['#6A994E', '#A7C957', '#F2E8CF', '#BC4749', '#386641'],
+      ['#4F86C6', '#A1C6EA', '#FFE1A8', '#FFADAD', '#CA7DF9'],
+      ['#90BE6D', '#F9C74F', '#F9844A', '#43AA8B', '#577590']
+    ];
+    let paletteIndex = 0;
+    let allData = []; 
+
+    function loadFile() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+        
+        allData = json; 
+        document.getElementById('recordCount').textContent = `Loaded ${json.length} records`;
+        
+        document.getElementById('filterSection').style.display = 'flex';
+        populateYearFilter(json);
+        
+        generateDashboard(json);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function populateYearFilter(data) {
+      const yearFilter = document.getElementById('yearFilter');
+      while (yearFilter.options.length > 1) {
+        yearFilter.remove(1);
+      }
+      
+      const years = new Set();
+      data.forEach(item => {
+        if (item['Date Of Birth']) {
+          const date = parseDate(item['Date Of Birth']);
+          if (!isNaN(date)) {
+            years.add(date.getFullYear());
+          }
+        }
+      });
+      
+      Array.from(years).sort((a, b) => b - a).forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearFilter.appendChild(option);
+      });
+    }
+
+    function updateMonthFilter() {
+      const yearFilter = document.getElementById('yearFilter');
+      const monthFilterGroup = document.getElementById('monthFilterGroup');
+      
+      if (yearFilter.value) {
+        monthFilterGroup.style.display = 'flex';
+      } else {
+        monthFilterGroup.style.display = 'none';
+        document.getElementById('monthFilter').value = '';
+      }
+      
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const yearFilter = document.getElementById('yearFilter').value;
+      const monthFilter = document.getElementById('monthFilter').value;
+      
+      document.getElementById('clearFiltersBtn').disabled = !yearFilter && !monthFilter;
+      
+      let filteredData = allData.filter(item => {
+        if (!item['Date Of Birth']) return false; 
+        
+        const date = parseDate(item['Date Of Birth']);
+        if (isNaN(date)) return false; 
+        
+        if (yearFilter && date.getFullYear() !== parseInt(yearFilter)) {
+          return false;
+        }
+        
+        if (yearFilter && monthFilter && date.getMonth() !== parseInt(monthFilter)) {
+          return false;
+        }
+        
+        return true;
+      });
+      
+      generateDashboard(filteredData);
+    }
+
+    function clearFilters() {
+      document.getElementById('yearFilter').value = '';
+      document.getElementById('monthFilter').value = '';
+      document.getElementById('monthFilterGroup').style.display = 'none';
+      document.getElementById('clearFiltersBtn').disabled = true;
+      generateDashboard(allData);
+    }
+
+    function parseDate(dateValue) {
+      if (typeof dateValue === 'number') {
+        const excelEpoch = new Date(1899, 11, 30);
+        const date = new Date(excelEpoch.getTime() + dateValue * 86400000);
+        return date;
+      }
+      
+      if (typeof dateValue === 'string') {
+        const match = dateValue.match(/^(\d{2})\/(\d{2})\/(\d{4})$/); 
+        if (match) {
+			const [_, day, month, year] = match;
+			const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+			return isNaN(date) ? new Date(NaN) : date;
+        }
+		
+		const date = new Date(dateValue);
+		return isNaN(date) ? new Date(NaN) : date;
+	  }
+	  
+	  return new Date(NaN);
+    }
+
+    function generateDashboard(data) {
+      document.getElementById('dashboard').innerHTML = '';
+      if (data.length === 0) {
+        document.getElementById('dashboard').innerHTML = '<p style="padding: 20px; color: #666; grid-column: 1/-1; text-align: center;">No data matches the selected filters.</p>';
+        return;
+      }
+
+      const addChart = (title, labels, values) => {
+        const id = 'chart-' + Math.random().toString(36).substring(2);
+        const div = document.createElement('div');
+        div.className = 'chart-container';
+        div.id = id;
+        document.getElementById('dashboard').appendChild(div);
+
+        const currentPalette = colorPalettes[paletteIndex % colorPalettes.length];
+        const colors = labels.map((_, i) => currentPalette[i % currentPalette.length]);
+        paletteIndex++;
+
+        Plotly.newPlot(id, [{
+          x: labels,
+          y: values,
+          type: 'bar',
+          marker: { color: colors }
+        }], {
+          title: { text: title, font: { family: 'Segoe UI', size: 16 } },
+          margin: { t: 40, b: 60, l: 40, r: 20 },
+          font: { family: 'Segoe UI' },
+          responsive: true
+        });
+      };
+
+      const groupBy = (arr, key) => {
+        const result = {};
+        arr.forEach(item => {
+          const val = item[key] || 'Unknown';
+          result[val] = (result[val] || 0) + 1;
+        });
+        return result;
+      };
+
+      const bucketBy = (arr, key, buckets) => {
+        const result = Array(buckets.length).fill(0);
+        arr.forEach(item => {
+          const value = parseFloat(item[key]);
+          for (let i = 0; i < buckets.length; i++) {
+            const [min, max] = buckets[i];
+            if (value >= min && (max === null || value < max)) {
+              result[i]++;
+              break;
+            }
+          }
+        });
+        return result;
+      };
+
+      const monthlyCountWithYear = (arr, key) => {
+        const result = {};
+        arr.forEach(item => {
+          const date = parseDate(item[key]);
+          if (!isNaN(date)) {
+            const label = `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+            result[label] = (result[label] || 0) + 1;
+          }
+        });
+        const sortedLabels = Object.keys(result).sort((a, b) => new Date(a) - new Date(b));
+        return [sortedLabels, sortedLabels.map(l => result[l])];
+      };
+
+      const [reportLabels, reportValues] = monthlyCountWithYear(data, 'Reporting Date');
+      addChart('Applications by Reporting Date', reportLabels, reportValues);
+
+      const [dobLabels, dobValues] = monthlyCountWithYear(data, 'Date Of Birth');
+      addChart('Applications by Date of Birth', dobLabels, dobValues);
+
+      const timeGapBuckets = [[0, 3], [3, 8], [8, 22], [22, 31], [31, 366], [366, null]];
+      const timeGapLabels = ['0-2 days', '3-7 days', '8-21 days', '22-30 days', '31-365 days', '365+ days'];
+      addChart('Time Gap Distribution', timeGapLabels, bucketBy(data, 'Time Gap', timeGapBuckets));
+
+      const firstNameMissing = data.filter(d => !d['First Name'] && d['Appl Type'] !== 'Still Birth').length;
+      addChart('Missing First Names (Excl. Still Birth)', ['Missing', 'Present'], [firstNameMissing, data.length - firstNameMissing]);
+
+      const fields = [
+        ['Place of Birth', 'Place of Birth'],
+        ["Id Proof Type", "Father's ID Proof"],
+        ["Id Proof Type_1", "Mother's ID Proof"],
+        ['District', 'Present Address - District'],
+        ['Block/Municipality', 'Present Address - Block/Municipality'],
+        ['District_1', 'Permanent Address - District'],
+        ['Block/Municipality_1', 'Permanent Address - Block/Municipality'],
+        ['Religion', 'Religion'],
+        ["Father's Level Of Education", "Father's Education"],
+        ["Father's Occupation", "Father's Occupation"],
+        ["Mother's Level Of Education", "Mother's Education"],
+        ["Mother's Occupation", "Mother's Occupation"],
+        ['Status', 'Application Status'],
+        ['Appl Type', 'Application Type'],
+        ['Type Of Attention At Delivery', 'Type of Attention at Delivery'],
+        ['Delivery Method', 'Delivery Method'],
+        ['Data Entered by (Role)', 'Entered By (Role)']
+      ];
+
+      fields.forEach(([key, title]) => {
+        const grouped = groupBy(data, key);
+        addChart(title, Object.keys(grouped), Object.values(grouped));
+      });
+
+      const weightBuckets = [[0, 1], [1, 1.5], [1.5, 2], [2, 2.5], [2.5, 3], [3, 3.5], [3.5, null]];
+      const weightLabels = ['<1 KG', '1-1.5 KG', '1.5-2 KG', '2-2.5 KG', '2.5-3 KG', '3-3.5 KG', '>3.5 KG'];
+      addChart('Birth Weight Distribution', weightLabels, bucketBy(data, 'Birth Weight (Kg)', weightBuckets));
+    }
+  </script>
+</body>
+</html>
+</textarea>
+
+<textarea id="app-3" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Death Certificate Application Dashboard</title>
+  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary: #1e5799;
+      --secondary: #2989d8;
+      --bg: #f5f7fa;
+      --white: #ffffff;
+      --text: #333;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 1.5rem 2%;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    header h1 { margin: 0; font-size: 1.8rem; letter-spacing: -0.5px; }
+    header p { margin: 0.3rem 0 0; opacity: 0.9; font-size: 0.95rem; }
+
+    /* FULL PAGE VIEW CONTAINER */
+    .main-container {
+      width: 98%;
+      margin: 0 auto;
+      padding: 20px 0;
+    }
+
+    .card {
+      background: var(--white);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .upload-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .filter-section {
+      display: none; /* Toggled by logic */
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: flex-end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .filter-group label {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    select, button {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      transition: all 0.2s ease;
+      background: white;
+    }
+
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover { background-color: #164375; transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    button:disabled { background-color: #ccc; cursor: not-allowed; transform: none; }
+
+    /* FULL WIDTH GRID FOR CHARTS */
+    #dashboard {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* Forces two charts per row */
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .chart-container {
+      background: var(--white);
+      padding: 1rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      min-height: 500px; /* Fixed height for consistent rows */
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    #recordCount {
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 0.9rem;
+    }
+
+    /* RESPONSIVE: Stack charts on smaller screens */
+    @media (max-width: 1200px) {
+      #dashboard { grid-template-columns: 1fr; }
+      .main-container { width: 95%; }
+    }
+
+    @media (max-width: 768px) {
+      header { text-align: center; }
+      .filter-section { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Death Application Analytics Dashboard</h1>
+    <p>Interactive Visualization of Death Registration Data</p>
+  </header>
+
+  <div class="main-container">
+    <section class="card upload-section">
+      <h2 style="margin-top:0; font-size:1.2rem;">Upload Your Data</h2>
+      <div class="upload-controls">
+        <input type="file" id="fileInput" accept=".xlsx, .xls, .json">
+        <button onclick="loadFile()">Load Data</button>
+        <span id="recordCount"></span>
+      </div>
+    </section>
+
+    <section class="card filter-section" id="filterSection">
+      <h3 style="margin: 0; width: 100%; font-size:1.1rem;">Filter by Date of Death</h3>
+      <div class="filter-group">
+        <label for="yearFilter">Select Year</label>
+        <select id="yearFilter" onchange="updateMonthFilter()">
+          <option value="">All Years</option>
+        </select>
+      </div>
+      <div class="filter-group" id="monthFilterGroup" style="display: none;">
+        <label for="monthFilter">Select Month</label>
+        <select id="monthFilter" onchange="applyFilters()">
+          <option value="">All Months</option>
+          <option value="0">January</option>
+          <option value="1">February</option>
+          <option value="2">March</option>
+          <option value="3">April</option>
+          <option value="4">May</option>
+          <option value="5">June</option>
+          <option value="6">July</option>
+          <option value="7">August</option>
+          <option value="8">September</option>
+          <option value="9">October</option>
+          <option value="10">November</option>
+          <option value="11">December</option>
+        </select>
+      </div>
+      <button onclick="clearFilters()" id="clearFiltersBtn" disabled style="background-color: #6c757d;">Clear Filters</button>
+    </section>
+
+    <main id="dashboard"></main>
+  </div>
+
+  <script>
+    let allData = []; // Store the original unfiltered data
+    const vibrantColors = [
+      '#6A994E', '#A7C957', '#F2E8CF', '#BC4749', '#386641',
+      '#DDA15E', '#E5989B', '#9A8C98', '#52796F', '#B5838D',
+      '#FFC6FF', '#A0C4FF', '#BDB2FF', '#FFADAD', '#FFD6A5',
+      '#FDFFB6', '#CAFFBF', '#9BF6FF', '#A3C4BC', '#FFB4A2'
+    ];
+
+    function loadFile() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        let json;
+        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          json = XLSX.utils.sheet_to_json(firstSheet);
+        } else {
+          const raw = e.target.result.trim();
+          json = raw.startsWith('[') ? JSON.parse(raw) : [JSON.parse(raw)];
+        }
+        
+        allData = json; // Store the original data
+        document.getElementById('recordCount').textContent = `✓ Loaded ${json.length} records`;
+        
+        // Show filter section and populate year filter
+        document.getElementById('filterSection').style.display = 'flex';
+        populateYearFilter(json);
+        
+        generateDashboard(json);
+      };
+      
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        reader.readAsArrayBuffer(file);
+      } else {
+        reader.readAsText(file);
+      }
+    }
+
+    function populateYearFilter(data) {
+      const yearFilter = document.getElementById('yearFilter');
+      // Clear existing options except the first one
+      while (yearFilter.options.length > 1) {
+        yearFilter.remove(1);
+      }
+      
+      // Extract unique years from Date Of Death
+      const years = new Set();
+      data.forEach(item => {
+        if (item['Date Of Death']) {
+          const date = parseDate(item['Date Of Death']);
+          if (!isNaN(date)) {
+            years.add(date.getFullYear());
+          }
+        }
+      });
+      
+      // Add sorted years to dropdown (newest first)
+      Array.from(years).sort((a, b) => b - a).forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearFilter.appendChild(option);
+      });
+    }
+
+    function updateMonthFilter() {
+      const yearFilter = document.getElementById('yearFilter');
+      const monthFilterGroup = document.getElementById('monthFilterGroup');
+      
+      if (yearFilter.value) {
+        monthFilterGroup.style.display = 'flex';
+      } else {
+        monthFilterGroup.style.display = 'none';
+        document.getElementById('monthFilter').value = '';
+      }
+      
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const yearFilter = document.getElementById('yearFilter').value;
+      const monthFilter = document.getElementById('monthFilter').value;
+      
+      // Enable/disable clear filters button
+      document.getElementById('clearFiltersBtn').disabled = !yearFilter && !monthFilter;
+      
+      // Filter the data
+      let filteredData = allData.filter(item => {
+        if (!item['Date Of Death']) return false; // Exclude records with no date
+        
+        const date = parseDate(item['Date Of Death']);
+        if (isNaN(date)) return false; // Exclude invalid dates
+        
+        // Apply year filter if set
+        if (yearFilter && date.getFullYear() !== parseInt(yearFilter)) {
+          return false;
+        }
+        
+        // Apply month filter if set and year is selected
+        if (yearFilter && monthFilter && date.getMonth() !== parseInt(monthFilter)) {
+          return false;
+        }
+        
+        return true;
+      });
+      
+      // Update the dashboard with filtered data
+      generateDashboard(filteredData);
+    }
+
+    function clearFilters() {
+      document.getElementById('yearFilter').value = '';
+      document.getElementById('monthFilter').value = '';
+      document.getElementById('monthFilterGroup').style.display = 'none';
+      document.getElementById('clearFiltersBtn').disabled = true;
+      generateDashboard(allData);
+    }
+
+    function parseDate(dateValue) {
+      // Handle Excel date serial numbers (days since 1900)
+      if (typeof dateValue === 'number') {
+        const excelEpoch = new Date(1899, 11, 30);
+        const date = new Date(excelEpoch.getTime() + dateValue * 24 * 60 * 60 * 1000);
+        return date;
+      }
+      
+      // Handle string dates in DD/MM/YYYY format
+      if (typeof dateValue === 'string') {
+        // First try DD/MM/YYYY format (primary format)
+        const parts = dateValue.split('/');
+        if (parts.length === 3) {
+          const day = parseInt(parts[0], 10);
+          const month = parseInt(parts[1], 10) - 1;
+          const year = parseInt(parts[2], 10);
+          
+          // Validate the date components
+          if (day >= 1 && day <= 31 && month >= 0 && month <= 11 && year >= 1900 && year <= new Date().getFullYear() + 1) {
+            const date = new Date(year, month, day);
+            if (!isNaN(date)) return date;
+          }
+        }
+        
+        // Try other formats as fallback
+        const formats = [
+          /(\d{4})-(\d{2})-(\d{2})/, // YYYY-MM-DD
+          /(\d{2})-(\d{2})-(\d{4})/, // MM-DD-YYYY
+          /(\d{4})\/(\d{2})\/(\d{2})/ // YYYY/MM/DD
+        ];
+        
+        for (const format of formats) {
+          const match = dateValue.match(format);
+          if (match) {
+            const year = parseInt(match[1]);
+            const month = parseInt(match[2]) - 1;
+            const day = parseInt(match[3]);
+            const date = new Date(year, month, day);
+            if (!isNaN(date)) return date;
+          }
+        }
+      }
+      
+      return new Date(NaN); // Return invalid date if parsing fails
+    }
+
+    function generateDashboard(data) {
+      const dashboard = document.getElementById('dashboard');
+      dashboard.innerHTML = '';
+      if (data.length === 0) {
+        dashboard.innerHTML = '<p style="padding: 20px; color: #666; grid-column: 1/-1; text-align:center;">No data matches the selected filters.</p>';
+        return;
+      }
+
+      const addChart = (title, labels, values, type = 'bar') => {
+        const id = 'chart-' + Math.random().toString(36).substr(2, 9);
+        const div = document.createElement('div');
+        div.className = 'chart-container';
+        div.id = id;
+        dashboard.appendChild(div);
+
+        const trace = type === 'pie'
+          ? [{ labels, values, type, marker: { colors: vibrantColors } }]
+          : [{ x: labels, y: values, type, marker: { color: vibrantColors } }];
+
+        const layout = {
+          title: { text: title, font: { family: 'Segoe UI', size: 16 } },
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          font: { family: 'Segoe UI, Tahoma, Geneva, Verdana', color: '#333' },
+          margin: { t: 50, b: 50, l: 50, r: 20 }
+        };
+
+        Plotly.newPlot(id, trace, layout, {responsive: true});
+      };
+
+      const groupBy = (arr, key) => {
+        const result = {};
+        arr.forEach(item => {
+          const val = item[key] || 'Unknown';
+          result[val] = (result[val] || 0) + 1;
+        });
+        return result;
+      };
+
+      const bucketBy = (arr, key, buckets) => {
+        const result = Array(buckets.length).fill(0);
+        arr.forEach(item => {
+          const value = parseFloat(item[key]);
+          if (!isNaN(value)) {
+            for (let i = 0; i < buckets.length; i++) {
+              const [min, max] = buckets[i];
+              if (value >= min && (max === null || value < max)) {
+                result[i]++;
+                break;
+              }
+            }
+          }
+        });
+        return result;
+      };
+
+      const monthlyCount = (arr, key) => {
+        const result = {};
+        const currentYear = new Date().getFullYear();
+        
+        arr.forEach(item => {
+          if (!item[key]) return;
+          const date = parseDate(item[key]);
+          if (isNaN(date)) return;
+          const year = date.getFullYear();
+          if (year < 2000 || year > currentYear + 1) return;
+          const label = `${date.toLocaleString('default', { month: 'short' })} ${year}`;
+          result[label] = (result[label] || 0) + 1;
+        });
+        
+        const sorted = Object.entries(result).sort((a, b) => new Date(a[0]) - new Date(b[0]));
+        return [sorted.map(x => x[0]), sorted.map(x => x[1])];
+      };
+
+      const [reportLabels, reportValues] = monthlyCount(data, 'Reporting Date');
+      addChart('Applications by Reporting Date', reportLabels, reportValues);
+
+      const [deathLabels, deathValues] = monthlyCount(data, 'Date Of Death');
+      addChart('Applications by Date of Death', deathLabels, deathValues);
+
+      const timeGapBuckets = [[0, 3], [3, 8], [8, 22], [22, 31], [31, 366], [366, null]];
+      const timeGapLabels = ['0-2 days', '3-7 days', '8-21 days', '22-30 days', '31-365 days', '365+ days'];
+      addChart('Time Gap Distribution', timeGapLabels, bucketBy(data, 'Time Gap', timeGapBuckets));
+
+      const ageBuckets = [[0, 1], [1, 5], [5, 15], [15, 25], [25, 35], [35, 45], [45, 55], [55, 65], [65, 70], [70, null]];
+      const ageLabels = ['Below 01', '01-04', '05-14', '15-24', '25-34', '35-44', '45-54', '55-64', '65-69', '70+'];
+      const ageValues = Array(ageLabels.length).fill(0);
+      let notStated = 0;
+      data.forEach(item => {
+        const age = parseFloat(item['Age']);
+        if (isNaN(age)) { notStated++; } else {
+          for (let i = 0; i < ageBuckets.length; i++) {
+            const [min, max] = ageBuckets[i];
+            if (age >= min && (max === null || age < max)) { ageValues[i]++; break; }
+          }
+        }
+      });
+      addChart('Age Distribution', [...ageLabels, 'Not stated'], [...ageValues, notStated]);
+
+      const genderGrouped = groupBy(data, 'Gender');
+      addChart('Gender Distribution', Object.keys(genderGrouped), Object.values(genderGrouped), 'pie');
+
+      const religionGrouped = groupBy(data, 'Religion');
+      addChart('Religion-wise Death Count', Object.keys(religionGrouped), Object.values(religionGrouped));
+
+      const placeGrouped = groupBy(data, 'Place of Death');
+      addChart('Place of Death', Object.keys(placeGrouped), Object.values(placeGrouped));
+
+      const districtGrouped = groupBy(data, 'District');
+      addChart('District-wise Applications', Object.keys(districtGrouped), Object.values(districtGrouped));
+
+      const urbanRural = groupBy(data, 'Urban/Rural');
+      addChart('Urban vs Rural Reports', Object.keys(urbanRural), Object.values(urbanRural), 'pie');
+
+      const blockGrouped = groupBy(data, 'Block/Municipality');
+      addChart('Block/Municipality-wise Reports', Object.keys(blockGrouped), Object.values(blockGrouped));
+
+      const enteredByRole = groupBy(data, 'Data Entered by (Role)');
+      addChart('Applications Entered by Role', Object.keys(enteredByRole), Object.values(enteredByRole));
+
+      const statusGrouped = groupBy(data, 'Status');
+      addChart('Application Status', Object.keys(statusGrouped), Object.values(statusGrouped));
+    }
+  </script>
+</body>
+</html>
+</textarea>
+
+<textarea id="app-4" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actual Death Report Generator</title>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --secondary: #3f37c9;
+      --dark: #1b263b;
+      --light: #f8f9fa;
+      --success: #4cc9f0;
+      --warning: #f72585;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f0f2f5;
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: white;
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 25px;
+      font-weight: 600;
+      font-size: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+
+    input[type="date"],
+    input[type="file"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      transition: var(--transition);
+    }
+
+    input[type="date"]:focus,
+    input[type="file"]:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      font-size: 100px;
+      opacity: 0;
+      right: 0;
+      top: 0;
+    }
+
+    .file-input-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 15px;
+      background: #f8f9fa;
+      border: 1px dashed #ccc;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .file-input-label:hover {
+      background: #e9ecef;
+      border-color: var(--primary-light);
+    }
+
+    .file-input-text {
+      color: #666;
+    }
+
+    .file-input-button {
+      background: var(--primary-light);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background-color: var(--secondary);
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .file-list {
+      margin-top: 15px;
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: var(--border-radius);
+      padding: 10px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .file-item:last-child {
+      border-bottom: none;
+    }
+
+    .file-icon {
+      margin-right: 10px;
+      color: var(--primary);
+    }
+
+    .note {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+      font-style: italic;
+    }
+
+    .stats {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      
+      h2 {
+        font-size: 24px;
+      }
+      
+      input[type="date"],
+      input[type="file"],
+      button {
+        padding: 10px 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 15px;
+      }
+      
+      h2 {
+        font-size: 22px;
+        margin-bottom: 15px;
+      }
+    }
+
+    /* Loading animation */
+    .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📊 Actual Death Report Generator</h2>
+    
+    <div class="form-group">
+      <label for="fromDate">From Date</label>
+      <input type="date" id="fromDate" class="form-control">
+    </div>
+    
+    <div class="form-group">
+      <label for="toDate">To Date</label>
+      <input type="date" id="toDate" class="form-control">
+    </div>
+    
+    <div class="form-group">
+      <label>Upload Excel Files</label>
+      <div class="file-input-wrapper">
+        <label class="file-input-label" for="fileInput">
+          <span class="file-input-text" id="fileInputText">Choose files...</span>
+          <span class="file-input-button">Browse</span>
+        </label>
+        <input type="file" id="fileInput" accept=".xlsx, .xls" multiple>
+      </div>
+      <div class="file-list" id="fileList"></div>
+      <p class="note">Note: Reports exclude citizen-submitted/rejected entries and all rejected status entries.</p>
+    </div>
+    
+    <button onclick="processFiles()" id="generateBtn">
+      <span class="spinner" id="spinner"></span>
+      Generate Death Report.xlsx
+    </button>
+
+    <div class="stats" id="processingStats" style="display: none;">
+      <h3>Processing Statistics</h3>
+      <div id="statsContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // Display selected files
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+      
+      if (this.files.length === 0) {
+        document.getElementById('fileInputText').textContent = 'Choose files...';
+        return;
+      }
+      
+      document.getElementById('fileInputText').textContent = `${this.files.length} file(s) selected`;
+      
+      Array.from(this.files).forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+          <span class="file-icon">📄</span>
+          <span>${index + 1}. ${file.name}</span>
+        `;
+        fileList.appendChild(fileItem);
+      });
+    });
+
+    function findColumnIndex(headers, possibleNames) {
+      if (!headers) return -1;
+      for (const name of possibleNames) {
+        const index = headers.findIndex(h => 
+          h && h.toString().toLowerCase().includes(name.toLowerCase())
+        );
+        if (index !== -1) return index;
+      }
+      return -1;
+    }
+
+    function shouldSkipRow(row, statusColIndex, roleColIndex) {
+      if (statusColIndex !== -1 && row[statusColIndex] && 
+          row[statusColIndex].toString().toLowerCase() === 'rejected') {
+        return true;
+      }
+      
+      if (roleColIndex !== -1 && statusColIndex !== -1 && 
+          row[roleColIndex] && row[roleColIndex].toString().toLowerCase() === 'citizen' &&
+          row[statusColIndex] && (
+            row[statusColIndex].toString().toLowerCase() === 'application submitted' ||
+            row[statusColIndex].toString().toLowerCase() === 'rejected'
+          )) {
+        return true;
+      }
+      
+      return false;
+    }
+
+    function parseDate(value) {
+      if (!value) return null;
+      
+      // Handle Excel numeric dates
+      if (typeof value === 'number') {
+        const parsed = XLSX.SSF.parse_date_code(value);
+        if (parsed) {
+          return new Date(parsed.y, parsed.m - 1, parsed.d);
+        }
+      }
+      
+      // Handle string dates
+      if (typeof value === 'string') {
+        // Try different date formats
+        const formats = [
+          { regex: /^(\d{2})\/(\d{2})\/(\d{4})$/, fn: (m) => new Date(m[3], m[2]-1, m[1]) }, // DD/MM/YYYY
+          { regex: /^(\d{2})-(\d{2})-(\d{4})$/, fn: (m) => new Date(m[3], m[2]-1, m[1]) }, // DD-MM-YYYY
+          { regex: /^(\d{4})-(\d{2})-(\d{2})$/, fn: (m) => new Date(m[1], m[2]-1, m[3]) }, // YYYY-MM-DD
+          { regex: /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, fn: (m) => new Date(m[3], m[1]-1, m[2]) }, // MM/DD/YYYY
+          { regex: /^(\d{1,2})-(\d{1,2})-(\d{4})$/, fn: (m) => new Date(m[3], m[1]-1, m[2]) }  // MM-DD-YYYY
+        ];
+        
+        for (const format of formats) {
+          const match = value.match(format.regex);
+          if (match) {
+            const date = format.fn(match);
+            if (!isNaN(date.getTime())) return date;
+          }
+        }
+      }
+      
+      return null;
+    }
+
+    async function processFiles() {
+      const fromDate = new Date(document.getElementById('fromDate').value);
+      const toDate = new Date(document.getElementById('toDate').value);
+      const files = document.getElementById('fileInput').files;
+      const generateBtn = document.getElementById('generateBtn');
+      const spinner = document.getElementById('spinner');
+      const statsDiv = document.getElementById('processingStats');
+      const statsContent = document.getElementById('statsContent');
+
+      if (!fromDate || !toDate) {
+        alert("Please select both date ranges.");
+        return;
+      }
+
+      if (files.length === 0) {
+        alert("Please upload at least one Excel file.");
+        return;
+      }
+
+      if (fromDate > toDate) {
+        alert("From Date cannot be after To Date.");
+        return;
+      }
+
+      // Show loading state
+      generateBtn.disabled = true;
+      spinner.style.display = 'block';
+      generateBtn.textContent = ' Generating...';
+      statsDiv.style.display = 'none';
+      statsContent.innerHTML = '';
+
+      let reportData = [];
+      let sl = 1;
+      let processingStats = [];
+
+      try {
+        // Process files in the exact order they were selected
+        for (const file of files) {
+          try {
+            const fileStats = {
+              fileName: file.name,
+              totalRows: 0,
+              skippedRejected: 0,
+              skippedCitizen: 0,
+              validEntries: 0,
+              jmtEntries: 0
+            };
+
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data);
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            
+            fileStats.totalRows = jsonData.length - 1; // Exclude header row
+
+            // Find column indices for required fields
+            const headers = jsonData[0] ? jsonData[0].map(h => h ? h.toString().toLowerCase() : '') : [];
+            
+            // Date of Death column (required)
+            const dobColIndex = findColumnIndex(headers, ['date of death', 'dod', 'death date']);
+            if (dobColIndex === -1) {
+              alert(`Could not find 'Date of Death' column in ${file.name}`);
+              continue;
+            }
+            
+            // Optional columns
+            const statusColIndex = findColumnIndex(headers, ['status', 'application status']);
+            const roleColIndex = findColumnIndex(headers, ['data entered by', 'role', 'entered by']);
+
+            let jmtCount = 0;
+            let totalValidEntries = 0;
+
+            // Process each row
+            for (let i = 1; i < jsonData.length; i++) {
+              const row = jsonData[i];
+              if (!row || row[dobColIndex] === undefined || row[dobColIndex] === null) continue;
+
+              // Check if row should be skipped
+              if (shouldSkipRow(row, statusColIndex, roleColIndex)) {
+                if (statusColIndex !== -1 && row[statusColIndex] && 
+                    row[statusColIndex].toString().toLowerCase() === 'rejected') {
+                  fileStats.skippedRejected++;
+                } else if (roleColIndex !== -1 && row[roleColIndex] && 
+                           row[roleColIndex].toString().toLowerCase() === 'citizen') {
+                  fileStats.skippedCitizen++;
+                }
+                continue;
+              }
+
+              const dobValue = row[dobColIndex];
+              const dateVal = parseDate(dobValue);
+
+              if (dateVal && !isNaN(dateVal.getTime())) {
+                totalValidEntries++;
+                
+                const compareDate = new Date(dateVal.getFullYear(), dateVal.getMonth(), dateVal.getDate());
+                const fromCompare = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+                const toCompare = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate() + 1);
+
+                if (compareDate >= fromCompare && compareDate < toCompare) {
+                  jmtCount++;
+                }
+              }
+            }
+
+            fileStats.validEntries = totalValidEntries;
+            fileStats.jmtEntries = jmtCount;
+            processingStats.push(fileStats);
+
+            // Add row with blank "Actual Death Event" column as requested
+            const rowNum = sl + 1; // +1 for header row
+            reportData.push([
+              sl++,
+              file.name.replace(/\.[^/.]+$/, ""), // Remove any extension
+              null, // Actual Death Event (blank as requested)
+              jmtCount,
+              { f: `C${rowNum}-D${rowNum}` }, // Pending formula (now C-D since B is blank)
+              { 
+                f: `IF(C${rowNum}=0,"N/A",(D${rowNum}/C${rowNum})*100)`, // Percentage formula
+                t: 'n',
+                z: '0.00'
+              }
+            ]);
+
+          } catch (error) {
+            console.error(`Error processing file ${file.name}:`, error);
+            alert(`Error processing file ${file.name}. See console for details.`);
+          }
+        }
+
+        // Prepare worksheet data with updated column name
+        const ws_data = [
+          ["SL No.", "Hospital Name", "Actual Death Events", "JMT Entry", "Pending", "Completed (%)"], // Updated column name
+          ...reportData
+        ];
+
+        // Create workbook and export
+        const ws = XLSX.utils.aoa_to_sheet(ws_data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Death Report");
+        
+        // Format columns for better Excel display
+        if (ws['!cols'] === undefined) ws['!cols'] = [];
+        ws['!cols'][0] = { wch: 8 };  // SL No.
+        ws['!cols'][1] = { wch: 30 }; // Hospital Name
+        ws['!cols'][2] = { wch: 20 }; // Actual Death Events
+        ws['!cols'][3] = { wch: 20 }; // JMT Entry
+        ws['!cols'][4] = { wch: 20 }; // Pending
+        ws['!cols'][5] = { wch: 20 }; // Completed
+
+        XLSX.writeFile(wb, "Death Report.xlsx");
+
+        // Show processing statistics
+        if (processingStats.length > 0) {
+          statsDiv.style.display = 'block';
+          let statsHTML = '<table style="width:100%; border-collapse: collapse;">';
+          statsHTML += '<tr><th style="text-align:left; padding:5px; border-bottom:1px solid #ddd;">File</th>' +
+                       '<th style="text-align:center; padding:5px; border-bottom:1px solid #ddd;">Total Rows</th>' +
+                       '<th style="text-align:center; padding:5px; border-bottom:1px solid #ddd;">Skipped (Rejected)</th>' +
+                       '<th style="text-align:center; padding:5px; border-bottom:1px solid #ddd;">Skipped (Citizen)</th>' +
+                       '<th style="text-align:center; padding:5px; border-bottom:1px solid #ddd;">Valid Entries</th>' +
+                       '<th style="text-align:center; padding:5px; border-bottom:1px solid #ddd;">JMT Entries</th></tr>';
+          
+          processingStats.forEach(stat => {
+            statsHTML += `<tr>
+              <td style="text-align:left; padding:5px; border-bottom:1px solid #eee;">${stat.fileName}</td>
+              <td style="text-align:center; padding:5px; border-bottom:1px solid #eee;">${stat.totalRows}</td>
+              <td style="text-align:center; padding:5px; border-bottom:1px solid #eee;">${stat.skippedRejected}</td>
+              <td style="text-align:center; padding:5px; border-bottom:1px solid #eee;">${stat.skippedCitizen}</td>
+              <td style="text-align:center; padding:5px; border-bottom:1px solid #eee;">${stat.validEntries}</td>
+              <td style="text-align:center; padding:5px; border-bottom:1px solid #eee;">${stat.jmtEntries}</td>
+            </tr>`;
+          });
+          
+          statsHTML += '</table>';
+          statsContent.innerHTML = statsHTML;
+        }
+
+      } catch (error) {
+        console.error('Error generating report:', error);
+        alert('An error occurred while generating the report. Please check your internet connection and try again.');
+      } finally {
+        // Reset loading state
+        generateBtn.disabled = false;
+        spinner.style.display = 'none';
+        generateBtn.textContent = 'Generate Death Report.xlsx';
+      }
+    }
+  </script>
+</body>
+</html>
+</textarea>
+
+<textarea id="app-5" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actual Live Birth Report Generator</title>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --secondary: #3f37c9;
+      --dark: #1b263b;
+      --light: #f8f9fa;
+      --success: #4cc9f0;
+      --warning: #f72585;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f0f2f5;
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: white;
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 25px;
+      font-weight: 600;
+      font-size: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+
+    input[type="date"],
+    input[type="file"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      transition: var(--transition);
+    }
+
+    input[type="date"]:focus,
+    input[type="file"]:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      font-size: 100px;
+      opacity: 0;
+      right: 0;
+      top: 0;
+    }
+
+    .file-input-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 15px;
+      background: #f8f9fa;
+      border: 1px dashed #ccc;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .file-input-label:hover {
+      background: #e9ecef;
+      border-color: var(--primary-light);
+    }
+
+    .file-input-text {
+      color: #666;
+    }
+
+    .file-input-button {
+      background: var(--primary-light);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background-color: var(--secondary);
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .file-list {
+      margin-top: 15px;
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: var(--border-radius);
+      padding: 10px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .file-item:last-child {
+      border-bottom: none;
+    }
+
+    .file-icon {
+      margin-right: 10px;
+      color: var(--primary);
+    }
+
+    .filter-info {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+    }
+
+    .filter-info h3 {
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+
+    .filter-info ul {
+      padding-left: 20px;
+    }
+
+    .filter-info li {
+      margin-bottom: 5px;
+    }
+
+    .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      
+      h2 {
+        font-size: 24px;
+      }
+      
+      input[type="date"],
+      input[type="file"],
+      button {
+        padding: 10px 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 15px;
+      }
+      
+      h2 {
+        font-size: 22px;
+        margin-bottom: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📊 Actual Live Birth Report Generator</h2>
+    
+    <div class="form-group">
+      <label for="fromDate">From Date</label>
+      <input type="date" id="fromDate" class="form-control">
+    </div>
+    
+    <div class="form-group">
+      <label for="toDate">To Date</label>
+      <input type="date" id="toDate" class="form-control">
+    </div>
+    
+    <div class="form-group">
+      <label>Upload Excel Files</label>
+      <div class="file-input-wrapper">
+        <label class="file-input-label" for="fileInput">
+          <span class="file-input-text" id="fileInputText">Choose files...</span>
+          <span class="file-input-button">Browse</span>
+        </label>
+        <input type="file" id="fileInput" accept=".xlsx" multiple>
+      </div>
+      <div class="file-list" id="fileList"></div>
+    </div>
+    
+    <button onclick="processFiles()" id="generateBtn">
+      <span class="spinner" id="spinner"></span>
+      Generate Live Birth Report.xlsx
+    </button>
+
+    <div class="filter-info">
+      <h3>Current Filter Rules:</h3>
+      <ul>
+        <li>Excluding citizen-submitted applications with status "Application Submitted" or "Rejected"</li>
+        <li>Excluding "Still Birth" and "Old Reg. Event Birth" application types</li>
+        <li>Excluding all records with "Rejected" status</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Display selected files
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+      
+      if (this.files.length === 0) {
+        document.getElementById('fileInputText').textContent = 'Choose files...';
+        return;
+      }
+      
+      document.getElementById('fileInputText').textContent = `${this.files.length} file(s) selected`;
+      
+      Array.from(this.files).forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+          <span class="file-icon">📄</span>
+          <span>${index + 1}. ${file.name}</span>
+        `;
+        fileList.appendChild(fileItem);
+      });
+    });
+
+    async function processFiles() {
+      const fromDate = new Date(document.getElementById('fromDate').value);
+      const toDate = new Date(document.getElementById('toDate').value);
+      const files = document.getElementById('fileInput').files;
+      const generateBtn = document.getElementById('generateBtn');
+      const spinner = document.getElementById('spinner');
+
+      // Validate inputs
+      if (!fromDate || !toDate) {
+        alert("Please select both date ranges.");
+        return;
+      }
+
+      if (files.length === 0) {
+        alert("Please upload at least one Excel file.");
+        return;
+      }
+
+      if (fromDate > toDate) {
+        alert("From Date cannot be after To Date.");
+        return;
+      }
+
+      // Show loading state
+      generateBtn.disabled = true;
+      spinner.style.display = 'block';
+      generateBtn.textContent = ' Generating...';
+
+      let reportData = [];
+      let sl = 1;
+
+      try {
+        // Process files in the exact order they were selected
+        for (const file of files) {
+          try {
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data);
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            
+            // Find column indexes for all required fields (case-insensitive)
+            const headers = jsonData[0].map(h => h ? h.toString().toLowerCase() : '');
+            
+            // Required columns
+            const dobColIndex = headers.findIndex(h => h.includes('date of birth'));
+            
+            // Optional filter columns
+            const roleColIndex = headers.findIndex(h => 
+              h.includes('data entered by') || h.includes('role'));
+            const statusColIndex = headers.findIndex(h => h.includes('status'));
+            const applTypeColIndex = headers.findIndex(h => 
+              h.includes('appl type') || h.includes('application type'));
+            
+            if (dobColIndex === -1) {
+              alert(`Could not find 'Date of Birth' column in ${file.name}`);
+              continue;
+            }
+
+            // Log warnings for missing optional columns
+            if (roleColIndex === -1) console.warn(`'Data Entered by (Role)' column not found in ${file.name}`);
+            if (statusColIndex === -1) console.warn(`'Status' column not found in ${file.name}`);
+            if (applTypeColIndex === -1) console.warn(`'Appl Type' column not found in ${file.name}`);
+
+            let jmtCount = 0;
+
+            for (let i = 1; i < jsonData.length; i++) {
+              const row = jsonData[i];
+              if (!row || row[dobColIndex] === undefined || row[dobColIndex] === null) continue;
+
+              // Check if record should be excluded based on filters
+              let excludeRecord = false;
+              
+              // 1. Check Status filter first (most restrictive)
+              if (statusColIndex !== -1 && row[statusColIndex] !== undefined) {
+                const status = String(row[statusColIndex]).toUpperCase();
+                if (status === "REJECTED") {
+                  excludeRecord = true;
+                }
+              }
+              
+              // 2. Check Role and Status combination
+              if (!excludeRecord && roleColIndex !== -1 && statusColIndex !== -1 && 
+                  row[roleColIndex] !== undefined && row[statusColIndex] !== undefined) {
+                const role = String(row[roleColIndex]).toUpperCase();
+                const status = String(row[statusColIndex]).toUpperCase();
+                if (role === "CITIZEN" && (status === "APPLICATION SUBMITTED" || status === "REJECTED")) {
+                  excludeRecord = true;
+                }
+              }
+              
+              // 3. Check Application Type
+              if (!excludeRecord && applTypeColIndex !== -1 && row[applTypeColIndex] !== undefined) {
+                const applType = String(row[applTypeColIndex]).toUpperCase();
+                if (applType === "STILL BIRTH" || applType === "OLD REG. EVENT BIRTH") {
+                  excludeRecord = true;
+                }
+              }
+              
+              if (excludeRecord) continue;
+
+              // Process date if record passed all filters
+              const dobValue = row[dobColIndex];
+              let dateVal;
+
+              if (typeof dobValue === 'number') {
+                const parsed = XLSX.SSF.parse_date_code(dobValue);
+                if (parsed) {
+                  dateVal = new Date(parsed.y, parsed.m - 1, parsed.d);
+                }
+              } else if (typeof dobValue === 'string') {
+                const parts = dobValue.split('/');
+                if (parts.length === 3) {
+                  dateVal = new Date(parts[2], parts[1] - 1, parts[0]);
+                }
+              }
+
+              if (dateVal && !isNaN(dateVal.getTime())) {
+                const compareDate = new Date(dateVal.getFullYear(), dateVal.getMonth(), dateVal.getDate());
+                const fromCompare = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+                const toCompare = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate() + 1);
+
+                if (compareDate >= fromCompare && compareDate < toCompare) {
+                  jmtCount++;
+                }
+              }
+            }
+
+            // Add row with formulas in Excel format
+            const rowNum = sl + 1; // +1 for header row
+            reportData.push([
+              sl++,
+              file.name.replace('.xlsx', ''),
+              null, // Actual Live Birth Event (blank)
+              jmtCount,
+              { f: `C${rowNum}-D${rowNum}` }, // Pending formula
+              { 
+                f: `IF(C${rowNum}=0,"N/A",(D${rowNum}/C${rowNum})*100)`, // Percentage formula
+                t: 'n', // Set cell type as number
+                z: '0.00'
+              }
+            ]);
+
+          } catch (error) {
+            console.error(`Error processing file ${file.name}:`, error);
+            alert(`Error processing file ${file.name}. See console for details.`);
+          }
+        }
+
+        // Prepare worksheet data
+        const ws_data = [
+          ["SL No.", "Hospital Name", "Actual Live Birth Events", "JMT Entry", "Pending", "Completed (%)"],
+          ...reportData
+        ];
+
+        // Create workbook and export
+        const ws = XLSX.utils.aoa_to_sheet(ws_data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Live Birth Report");
+        
+        // Format columns for better Excel display
+        if (ws['!cols'] === undefined) ws['!cols'] = [];
+        ws['!cols'][0] = { wch: 8 };  // SL No.
+        ws['!cols'][1] = { wch: 30 }; // Hospital Name
+        ws['!cols'][2] = { wch: 20 }; // Actual Live Birth Events
+        ws['!cols'][3] = { wch: 20 }; // JMT Entry
+        ws['!cols'][4] = { wch: 20 }; // Pending
+        ws['!cols'][5] = { wch: 20 }; // Completed
+
+        XLSX.writeFile(wb, "Live Birth Report.xlsx");
+
+      } catch (error) {
+        console.error('Error generating report:', error);
+        alert('An error occurred while generating the report. Please check your internet connection & try again.');
+      } finally {
+        // Reset loading state
+        generateBtn.disabled = false;
+        spinner.style.display = 'none';
+        generateBtn.textContent = 'Generate Live Birth Report.xlsx';
+      }
+    }
+  </script>
+</body>
+</html>
+</textarea>
+
+</body>
+</html>
