@@ -118,7 +118,7 @@
     <nav>
         <div class="nav-header">
             <h2><i class="fas fa-server"></i> Master Suite - Births & Deaths Reports Management</h2>
-            <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 5px;">Unified Rreports Master</p>
+            <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 5px;">by Aniruddha Dey, DPA, Coochbehar</p>
         </div>
         <div class="nav-links">
             <div class="nav-item" onclick="loadApp(0, this)">
@@ -1218,7 +1218,7 @@
 </html>
 </textarea>
 
-<textarea id="app-3" style="display:none;">
+    <textarea id="app-3" style="display:none;">
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1658,20 +1658,46 @@
       const timeGapLabels = ['0-2 days', '3-7 days', '8-21 days', '22-30 days', '31-365 days', '365+ days'];
       addChart('Time Gap Distribution', timeGapLabels, bucketBy(data, 'Time Gap', timeGapBuckets));
 
+      // --- FIXED AGE DISTRIBUTION LOGIC ---
       const ageBuckets = [[0, 1], [1, 5], [5, 15], [15, 25], [25, 35], [35, 45], [45, 55], [55, 65], [65, 70], [70, null]];
-      const ageLabels = ['Below 01', '01-04', '05-14', '15-24', '25-34', '35-44', '45-54', '55-64', '65-69', '70+'];
+      
+      // ADDED " Yrs" TO FIX X-AXIS RANGING ERROR
+      const ageLabels = ['< 1 Yr', '1-4 Yrs', '5-14 Yrs', '15-24 Yrs', '25-34 Yrs', '35-44 Yrs', '45-54 Yrs', '55-64 Yrs', '65-69 Yrs', '70+ Yrs'];
+      
       const ageValues = Array(ageLabels.length).fill(0);
       let notStated = 0;
+
       data.forEach(item => {
-        const age = parseFloat(item['Age']);
-        if (isNaN(age)) { notStated++; } else {
-          for (let i = 0; i < ageBuckets.length; i++) {
-            const [min, max] = ageBuckets[i];
-            if (age >= min && (max === null || age < max)) { ageValues[i]++; break; }
+          let rawAge = item['Age'];
+          if (rawAge === undefined || rawAge === null || rawAge === "") {
+              notStated++;
+              return;
           }
-        }
+
+          let ageInYears = 0;
+          let ageStr = String(rawAge).toLowerCase();
+
+          // Logic to handle units (Days/Months/Hours)
+          if (ageStr.includes('day') || ageStr.includes('month') || ageStr.includes('hour') || ageStr.includes('minute')) {
+              ageInYears = 0.5; // Place in '< 1 Yr' bucket
+          } else {
+              ageInYears = parseFloat(ageStr);
+          }
+
+          if (isNaN(ageInYears)) {
+              notStated++;
+          } else {
+              for (let i = 0; i < ageBuckets.length; i++) {
+                  const [min, max] = ageBuckets[i];
+                  if (ageInYears >= min && (max === null || ageInYears < max)) {
+                      ageValues[i]++;
+                      break;
+                  }
+              }
+          }
       });
       addChart('Age Distribution', [...ageLabels, 'Not stated'], [...ageValues, notStated]);
+      // --- END OF FIXED LOGIC ---
 
       const genderGrouped = groupBy(data, 'Gender');
       addChart('Gender Distribution', Object.keys(genderGrouped), Object.values(genderGrouped), 'pie');
@@ -1700,7 +1726,8 @@
   </script>
 </body>
 </html>
-</textarea>
+    </textarea>
+
 
 <textarea id="app-4" style="display:none;">
 <!DOCTYPE html>
