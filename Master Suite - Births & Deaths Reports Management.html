@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Suite - Births & Deaths Reports Management</title>
+    <title>Births & Deaths Reports Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -117,7 +117,7 @@
 
     <nav>
         <div class="nav-header">
-            <h2><i class="fas fa-server"></i> Master Suite - Births & Deaths Reports Management</h2>
+            <h2><i class="fas fa-server"></i> Master Suite - Births & Deaths Reports Management V 2.0</h2>
             <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 5px;">by Aniruddha Dey, DPA, Coochbehar</p>
         </div>
         <div class="nav-links">
@@ -139,6 +139,15 @@
             <div class="nav-item" onclick="loadApp(4, this)">
                 <i class="fas fa-file-export"></i> <span>Death Report Gen</span>
             </div>
+			<div class="nav-item" onclick="loadApp(6, this)">
+                <i class="fas fa-file-export"></i> <span>MCCD Dashboard</span>
+            </div>
+			<div class="nav-item" onclick="loadApp(7, this)">
+                <i class="fas fa-file-export"></i> <span>MCCD Cause Dashboard</span>
+            </div>
+			<div class="nav-item" onclick="loadApp(8, this)">
+                <i class="fas fa-file-export"></i> <span>Excel File Merger</span>
+            </div>			
         </div>
     </nav>
 
@@ -793,8 +802,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Birth Certificate Analytics Dashboard | Full Page</title>
-  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+  <title>Birth Certificate Analytics Dashboard | Chart.js</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
@@ -828,7 +837,6 @@
     header h1 { margin: 0; font-size: 1.75rem; letter-spacing: -0.5px; }
     header p { margin: 0.25rem 0 0; opacity: 0.9; font-size: 0.9rem; }
 
-    /* FLUID CONTAINER FOR FULL VIEW */
     .container-fluid {
       width: 98%;
       margin: 0 auto;
@@ -891,7 +899,6 @@
     button:hover { background-color: var(--hover); transform: translateY(-1px); }
     button:disabled { background-color: #ccc; cursor: not-allowed; }
 
-    /* GRID: 2 COLUMNS FOR FULL PAGE VIEW */
     #dashboard {
       display: grid;
       grid-template-columns: repeat(2, 1fr); 
@@ -901,12 +908,12 @@
 
     .chart-container {
       background: var(--white);
-      padding: 1rem;
+      padding: 1.5rem;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      min-height: 500px; /* Increased height for full page impact */
+      min-height: 450px;
       width: 100%;
-      overflow: hidden;
+      position: relative; /* Chart.js standard for responsiveness */
     }
 
     #recordCount {
@@ -917,21 +924,16 @@
       border-radius: 20px;
     }
 
-    /* RESPONSIVENESS */
     @media (max-width: 1200px) {
-      #dashboard { grid-template-columns: 1fr; } /* Stacks to 1 column on smaller monitors */
+      #dashboard { grid-template-columns: 1fr; }
       .container-fluid { width: 95%; }
-    }
-
-    @media (max-width: 600px) {
-      header { text-align: center; }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Birth Application Analytics Dashboard</h1>
-    <p>Complete Administrative Visualization Suite</p>
+    <p>Complete Administrative Visualization Suite (Chart.js Edition)</p>
   </header>
 
   <div class="container-fluid">
@@ -977,7 +979,6 @@
   </div>
 
   <script>
-    /* All functions below are kept identical to your original code */
     const colorPalettes = [
       ['#6A994E', '#A7C957', '#F2E8CF', '#BC4749', '#386641'],
       ['#4F86C6', '#A1C6EA', '#FFE1A8', '#FFADAD', '#CA7DF9'],
@@ -1003,7 +1004,6 @@
         
         document.getElementById('filterSection').style.display = 'flex';
         populateYearFilter(json);
-        
         generateDashboard(json);
       };
       reader.readAsArrayBuffer(file);
@@ -1014,17 +1014,13 @@
       while (yearFilter.options.length > 1) {
         yearFilter.remove(1);
       }
-      
       const years = new Set();
       data.forEach(item => {
         if (item['Date Of Birth']) {
           const date = parseDate(item['Date Of Birth']);
-          if (!isNaN(date)) {
-            years.add(date.getFullYear());
-          }
+          if (!isNaN(date)) years.add(date.getFullYear());
         }
       });
-      
       Array.from(years).sort((a, b) => b - a).forEach(year => {
         const option = document.createElement('option');
         option.value = year;
@@ -1036,40 +1032,28 @@
     function updateMonthFilter() {
       const yearFilter = document.getElementById('yearFilter');
       const monthFilterGroup = document.getElementById('monthFilterGroup');
-      
       if (yearFilter.value) {
         monthFilterGroup.style.display = 'flex';
       } else {
         monthFilterGroup.style.display = 'none';
         document.getElementById('monthFilter').value = '';
       }
-      
       applyFilters();
     }
 
     function applyFilters() {
       const yearFilter = document.getElementById('yearFilter').value;
       const monthFilter = document.getElementById('monthFilter').value;
-      
       document.getElementById('clearFiltersBtn').disabled = !yearFilter && !monthFilter;
       
       let filteredData = allData.filter(item => {
         if (!item['Date Of Birth']) return false; 
-        
         const date = parseDate(item['Date Of Birth']);
         if (isNaN(date)) return false; 
-        
-        if (yearFilter && date.getFullYear() !== parseInt(yearFilter)) {
-          return false;
-        }
-        
-        if (yearFilter && monthFilter && date.getMonth() !== parseInt(monthFilter)) {
-          return false;
-        }
-        
+        if (yearFilter && date.getFullYear() !== parseInt(yearFilter)) return false;
+        if (yearFilter && monthFilter && date.getMonth() !== parseInt(monthFilter)) return false;
         return true;
       });
-      
       generateDashboard(filteredData);
     }
 
@@ -1084,23 +1068,61 @@
     function parseDate(dateValue) {
       if (typeof dateValue === 'number') {
         const excelEpoch = new Date(1899, 11, 30);
-        const date = new Date(excelEpoch.getTime() + dateValue * 86400000);
-        return date;
+        return new Date(excelEpoch.getTime() + dateValue * 86400000);
       }
-      
       if (typeof dateValue === 'string') {
         const match = dateValue.match(/^(\d{2})\/(\d{2})\/(\d{4})$/); 
         if (match) {
-			const [_, day, month, year] = match;
-			const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-			return isNaN(date) ? new Date(NaN) : date;
+          const [_, day, month, year] = match;
+          return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
         }
-		
-		const date = new Date(dateValue);
-		return isNaN(date) ? new Date(NaN) : date;
-	  }
-	  
-	  return new Date(NaN);
+        const date = new Date(dateValue);
+        return isNaN(date) ? new Date(NaN) : date;
+      }
+      return new Date(NaN);
+    }
+
+    // New Chart.js based function
+    function addChart(title, labels, values) {
+      const chartDiv = document.createElement('div');
+      chartDiv.className = 'chart-container';
+      const canvas = document.createElement('canvas');
+      chartDiv.appendChild(canvas);
+      document.getElementById('dashboard').appendChild(chartDiv);
+
+      const currentPalette = colorPalettes[paletteIndex % colorPalettes.length];
+      const colors = labels.map((_, i) => currentPalette[i % currentPalette.length]);
+      paletteIndex++;
+
+      new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Total Applications',
+            data: values,
+            backgroundColor: colors,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: title,
+              font: { size: 16, family: 'Segoe UI', weight: '600' },
+              padding: { bottom: 20 }
+            },
+            legend: { display: false }
+          },
+          scales: {
+            y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
     }
 
     function generateDashboard(data) {
@@ -1109,30 +1131,6 @@
         document.getElementById('dashboard').innerHTML = '<p style="padding: 20px; color: #666; grid-column: 1/-1; text-align: center;">No data matches the selected filters.</p>';
         return;
       }
-
-      const addChart = (title, labels, values) => {
-        const id = 'chart-' + Math.random().toString(36).substring(2);
-        const div = document.createElement('div');
-        div.className = 'chart-container';
-        div.id = id;
-        document.getElementById('dashboard').appendChild(div);
-
-        const currentPalette = colorPalettes[paletteIndex % colorPalettes.length];
-        const colors = labels.map((_, i) => currentPalette[i % currentPalette.length]);
-        paletteIndex++;
-
-        Plotly.newPlot(id, [{
-          x: labels,
-          y: values,
-          type: 'bar',
-          marker: { color: colors }
-        }], {
-          title: { text: title, font: { family: 'Segoe UI', size: 16 } },
-          margin: { t: 40, b: 60, l: 40, r: 20 },
-          font: { family: 'Segoe UI' },
-          responsive: true
-        });
-      };
 
       const groupBy = (arr, key) => {
         const result = {};
@@ -1171,6 +1169,7 @@
         return [sortedLabels, sortedLabels.map(l => result[l])];
       };
 
+      // Charts Generation
       const [reportLabels, reportValues] = monthlyCountWithYear(data, 'Reporting Date');
       addChart('Applications by Reporting Date', reportLabels, reportValues);
 
@@ -1225,7 +1224,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Death Certificate Application Dashboard</title>
-  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
@@ -1336,6 +1335,7 @@
       width: 100%;
       box-sizing: border-box;
       overflow: hidden;
+      position: relative; /* Added for Chart.js responsiveness */
     }
 
     #recordCount {
@@ -1582,26 +1582,47 @@
         return;
       }
 
+      // Updated addChart function for Chart.js
       const addChart = (title, labels, values, type = 'bar') => {
-        const id = 'chart-' + Math.random().toString(36).substr(2, 9);
         const div = document.createElement('div');
         div.className = 'chart-container';
-        div.id = id;
+        
+        const canvas = document.createElement('canvas');
+        div.appendChild(canvas);
         dashboard.appendChild(div);
 
-        const trace = type === 'pie'
-          ? [{ labels, values, type, marker: { colors: vibrantColors } }]
-          : [{ x: labels, y: values, type, marker: { color: vibrantColors } }];
-
-        const layout = {
-          title: { text: title, font: { family: 'Segoe UI', size: 16 } },
-          plot_bgcolor: 'rgba(0,0,0,0)',
-          paper_bgcolor: 'rgba(0,0,0,0)',
-          font: { family: 'Segoe UI, Tahoma, Geneva, Verdana', color: '#333' },
-          margin: { t: 50, b: 50, l: 50, r: 20 }
-        };
-
-        Plotly.newPlot(id, trace, layout, {responsive: true});
+        // Chart.js Configuration
+        new Chart(canvas, {
+          type: type,
+          data: {
+            labels: labels,
+            datasets: [{
+              label: title,
+              data: values,
+              backgroundColor: vibrantColors,
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: true,
+                text: title,
+                font: { family: 'Segoe UI', size: 16 }
+              },
+              legend: {
+                display: type === 'pie' // Hide legend for bar charts, show for pie charts
+              }
+            },
+            scales: type === 'bar' ? {
+              y: {
+                beginAtZero: true
+              }
+            } : {}
+          }
+        });
       };
 
       const groupBy = (arr, key) => {
@@ -1661,7 +1682,6 @@
       // --- FIXED AGE DISTRIBUTION LOGIC ---
       const ageBuckets = [[0, 1], [1, 5], [5, 15], [15, 25], [25, 35], [35, 45], [45, 55], [55, 65], [65, 70], [70, null]];
       
-      // ADDED " Yrs" TO FIX X-AXIS RANGING ERROR
       const ageLabels = ['< 1 Yr', '1-4 Yrs', '5-14 Yrs', '15-24 Yrs', '25-34 Yrs', '35-44 Yrs', '45-54 Yrs', '55-64 Yrs', '65-69 Yrs', '70+ Yrs'];
       
       const ageValues = Array(ageLabels.length).fill(0);
@@ -1727,7 +1747,6 @@
 </body>
 </html>
     </textarea>
-
 
 <textarea id="app-4" style="display:none;">
 <!DOCTYPE html>
@@ -2783,6 +2802,1038 @@
 </body>
 </html>
 </textarea>
+<textarea id="app-6" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hospital Death Records — Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* CSS remains structurally identical, minified slightly for cleanliness */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root { --bg:#f5f6fa; --white:#ffffff; --border:#e8ecf2; --text:#1a1d27; --muted:#8892a4; --soft:#f0f3fa; --c1:#4f46e5; --c2:#e11d48; --c3:#059669; --c4:#d97706; --c5:#0284c7; --c6:#7c3aed; --c7:#0891b2; --c8:#db2777; --c9:#65a30d; --c10:#ea580c; --radius:16px; --shadow:0 1px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.05); --shadow-lg:0 4px 24px rgba(0,0,0,0.10); }
+html{scroll-behavior:smooth} body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+#uploadScreen { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0; background: linear-gradient(150deg,#f8f9ff 0%,#eef1fb 50%,#fdf2f8 100%); }
+.upload-hero { text-align:center; margin-bottom:40px; }
+.upload-logo { width:72px;height:72px; background:linear-gradient(135deg,var(--c1),var(--c5)); border-radius:22px; display:flex;align-items:center;justify-content:center; font-size:34px; margin:0 auto 20px; box-shadow:0 8px 30px rgba(79,70,229,0.3); }
+.upload-hero h1 { font-family:'Syne',sans-serif; font-size:36px;font-weight:800; color:var(--text); letter-spacing:-1px; margin-bottom:10px; }
+.upload-hero p { font-size:15px;color:var(--muted); max-width:380px;margin:0 auto; line-height:1.6; }
+.drop-zone { width:460px; background:var(--white); border:2.5px dashed #c7d0e8; border-radius:var(--radius); padding:44px 36px; text-align:center; cursor:pointer; transition:all 0.25s; box-shadow:var(--shadow); position:relative; }
+.drop-zone:hover,.drop-zone.over { border-color:var(--c1); background:#f8f7ff; box-shadow:var(--shadow-lg); transform:translateY(-2px); }
+.drop-zone input[type=file]{ position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
+.drop-icon { font-size:48px;margin-bottom:14px;display:block; }
+.drop-title { font-family:'Syne',sans-serif; font-size:18px;font-weight:700; color:var(--text);margin-bottom:6px; }
+.drop-sub { font-size:13px;color:var(--muted); }
+.drop-btn { display:inline-block; margin-top:18px; padding:10px 24px; background:var(--c1); color:#fff; border-radius:10px; font-size:14px;font-weight:600; font-family:'DM Sans',sans-serif; pointer-events:none; }
+.upload-note { margin-top:18px; font-size:12px;color:var(--muted); display:flex;align-items:center;gap:6px;justify-content:center; }
+.col-chips { margin-top:32px; display:flex;flex-wrap:wrap;gap:8px;justify-content:center; max-width:480px; }
+.chip { background:var(--white); border:1px solid var(--border); border-radius:20px; padding:5px 13px; font-size:12px;font-weight:500; color:var(--muted); box-shadow:0 1px 3px rgba(0,0,0,0.05); } .chip span {color:var(--c1);}
+#loadingScreen { min-height:100vh; display:none; flex-direction:column; align-items:center;justify-content:center; gap:20px; background:var(--bg); }
+.spinner { width:52px;height:52px; border:4px solid #e8ecf2; border-top-color:var(--c1); border-radius:50%; animation:spin 0.8s linear infinite; }
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text { font-family:'Syne',sans-serif; font-size:18px;font-weight:700;color:var(--text); } .loading-sub {font-size:13px;color:var(--muted);}
+#dashboardScreen {display:none;min-height:100vh;}
+.topbar { background:var(--white); border-bottom:1px solid var(--border); height:60px; display:flex;align-items:center;justify-content:space-between; padding:0 26px; position:sticky;top:0;z-index:200; box-shadow:0 1px 8px rgba(0,0,0,0.05); }
+.topbar-left { display:flex;align-items:center;gap:12px; }
+.topbar-icon { width:34px;height:34px; background:linear-gradient(135deg,var(--c1),var(--c5)); border-radius:10px; display:flex;align-items:center;justify-content:center; font-size:16px; }
+.topbar-title { font-family:'Syne',sans-serif; font-size:15px;font-weight:700;letter-spacing:-0.3px; }
+.topbar-sub { font-size:11px;color:var(--muted);margin-top:1px; font-family:'DM Mono',monospace; }
+.topbar-right { display:flex;align-items:center;gap:10px; }
+select { font-family:'DM Sans',sans-serif; font-size:12px; padding:6px 11px; border:1px solid var(--border); border-radius:8px; background:var(--white); color:var(--text); cursor:pointer;outline:none; transition:border-color 0.2s; } select:hover,select:focus{border-color:var(--c1);}
+.btn { font-family:'DM Sans',sans-serif; font-size:12px;font-weight:600; padding:7px 15px;border-radius:8px; border:none;cursor:pointer; display:flex;align-items:center;gap:6px; transition:all 0.2s; }
+.btn-reset { background:linear-gradient(135deg,var(--c2),#fb7185); color:#fff; box-shadow:0 2px 8px rgba(225,29,72,0.28); } .btn-reset:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(225,29,72,0.38);}
+.btn-upload { background:var(--soft); color:var(--c1); border:1px solid var(--border); } .btn-upload:hover{background:#ece9ff;border-color:var(--c1);}
+.dash-main { padding:22px 26px; max-width:1700px; margin:0 auto; }
+.kpi-row { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:18px; }
+.kpi { background:var(--white); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow); border-left:4px solid transparent; transition:all 0.2s; overflow:hidden; position:relative; animation:fadeUp 0.4s ease both; }
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);} .kpi::after{ content:'';position:absolute; top:-24px;right:-18px; width:72px;height:72px;border-radius:50%;opacity:0.06; }
+.kpi:nth-child(1){border-color:var(--c1);animation-delay:.05s}.kpi:nth-child(1)::after{background:var(--c1)}
+.kpi:nth-child(2){border-color:var(--c5);animation-delay:.10s}.kpi:nth-child(2)::after{background:var(--c5)}
+.kpi:nth-child(3){border-color:var(--c2);animation-delay:.15s}.kpi:nth-child(3)::after{background:var(--c2)}
+.kpi:nth-child(4){border-color:var(--c3);animation-delay:.20s}.kpi:nth-child(4)::after{background:var(--c3)}
+.kpi:nth-child(5){border-color:var(--c4);animation-delay:.25s}.kpi:nth-child(5)::after{background:var(--c4)}
+.kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:7px}
+.kpi-val{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;line-height:1;margin-bottom:5px}
+.kpi:nth-child(1) .kpi-val{color:var(--c1)} .kpi:nth-child(2) .kpi-val{color:var(--c5)} .kpi:nth-child(3) .kpi-val{color:var(--c2)} .kpi:nth-child(4) .kpi-val{color:var(--c3)} .kpi:nth-child(5) .kpi-val{color:var(--c4)}
+.kpi-sub{font-size:11px;color:var(--muted)}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px} .grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px} .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px} .grid-1{margin-bottom:14px}
+.card { background:var(--white); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow); transition:box-shadow 0.2s; animation:fadeUp 0.45s ease both; } .card:hover{box-shadow:var(--shadow-lg);}
+.card-head { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px; }
+.card-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:-.2px} .card-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.badge { font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px; background:#f0f0ff;color:var(--c1);letter-spacing:.4px; }
+.table-wrap{overflow-x:auto} table{width:100%;border-collapse:collapse;font-size:12.5px} thead tr{background:#f8fafc}
+th{ padding:9px 12px;text-align:left; font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.6px; color:var(--muted);border-bottom:2px solid var(--border); white-space:nowrap; }
+td{padding:9px 12px;border-bottom:1px solid #f1f5f9;color:var(--text)} tbody tr:hover{background:#fafbff} .mono{font-family:'DM Mono',monospace;font-size:11.5px}
+.gbadge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px} .gbadge.male{background:#eff6ff;color:var(--c5)} .gbadge.female{background:#fff1f2;color:var(--c2)}
+.tbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.search{ font-family:'DM Sans',sans-serif;font-size:12px; padding:7px 13px;border:1px solid var(--border);border-radius:8px; outline:none;width:210px;transition:border-color .2s; } .search:focus{border-color:var(--c1)}
+.pag{display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-size:11px;color:var(--muted)} .pag-btns{display:flex;gap:6px}
+.pag-btn{ font-family:'DM Sans',sans-serif;font-size:11px; padding:5px 11px;border:1px solid var(--border);border-radius:6px; background:var(--white);cursor:pointer;color:var(--text);transition:all .15s; }
+.pag-btn:hover:not(:disabled){background:var(--c1);color:#fff;border-color:var(--c1)} .pag-btn:disabled{opacity:.35;cursor:default}
+footer{text-align:center;padding:18px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);margin-top:4px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:1100px){ .kpi-row{grid-template-columns:repeat(3,1fr)} .grid-3{grid-template-columns:1fr 1fr} .grid-2-1{grid-template-columns:1fr} }
+@media(max-width:700px){ .drop-zone{width:90vw} .kpi-row{grid-template-columns:1fr 1fr} .grid-3,.grid-2-1,.grid-2{grid-template-columns:1fr} .topbar-right .btn-upload{display:none} }
+</style>
+</head>
+<body>
 
+<div id="uploadScreen">
+  <div class="upload-hero">
+    <div class="upload-logo">🏥</div>
+    <h1>Death Records Dashboard</h1>
+    <p>Upload your hospital Excel file to generate interactive dashboard.</p>
+  </div>
+  <div class="drop-zone" id="dropZone">
+    <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleFile(this.files[0])"/>
+    <span class="drop-icon">📊</span>
+    <div class="drop-title">Drop your Excel file here</div>
+    <div class="drop-sub">or click to browse from your computer</div>
+    <div class="drop-btn">Choose File</div>
+  </div>
+  <div class="upload-note"><span>✅</span> Supports .xlsx &amp; .xls · All processing happens in your browser</div>
+  <div class="col-chips">
+    <div class="chip"><span>📋</span> Reg Unit Name</div>
+    <div class="chip"><span>🏥</span> Hospital</div>
+    <div class="chip"><span>👤</span> Name of Deceased</div>
+    <div class="chip"><span>📅</span> Date of Death</div>
+    <div class="chip"><span>⚥</span> Gender</div>
+    <div class="chip"><span>🎂</span> Deceased Age</div>
+    <div class="chip"><span>🩺</span> Antecedent Cause</div>
+    <div class="chip"><span>🔬</span> Underlying Cause</div>
+  </div>
+</div>
+
+<div id="loadingScreen">
+  <div class="spinner"></div>
+  <div class="loading-text">Processing your data…</div>
+  <div class="loading-sub">Building charts and insights</div>
+</div>
+
+<div id="dashboardScreen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-icon">🏥</div>
+      <div>
+        <div class="topbar-title" id="dbTitle">Hospital Death Records Dashboard</div>
+        <div class="topbar-sub" id="dbSub">Loading…</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <select id="fMonth" onchange="applyFilters()">
+        <option value="">All Months</option>
+      </select>
+      <select id="fGender" onchange="applyFilters()">
+        <option value="">All Genders</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+      <select id="fAgeGroup" onchange="applyFilters()">
+        <option value="">All Age Groups</option>
+        <option value="0-20">0–20 yrs</option>
+        <option value="21-40">21–40 yrs</option>
+        <option value="41-60">41–60 yrs</option>
+        <option value="61-80">61–80 yrs</option>
+        <option value="81+">81+ yrs</option>
+      </select>
+      <button class="btn btn-reset" onclick="resetAll()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-6.5"/></svg>
+        Reset
+      </button>
+      <button class="btn btn-upload" onclick="newUpload()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        New File
+      </button>
+    </div>
+  </div>
+
+  <div class="dash-main">
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">Total Deaths</div><div class="kpi-val" id="kTotal">—</div><div class="kpi-sub" id="kTotalSub">—</div></div>
+      <div class="kpi"><div class="kpi-label">Male</div><div class="kpi-val" id="kMale">—</div><div class="kpi-sub" id="kMalePct">—</div></div>
+      <div class="kpi"><div class="kpi-label">Female</div><div class="kpi-val" id="kFemale">—</div><div class="kpi-sub" id="kFemalePct">—</div></div>
+      <div class="kpi"><div class="kpi-label">Average Age</div><div class="kpi-val" id="kAge">—</div><div class="kpi-sub">years at death</div></div>
+      <div class="kpi"><div class="kpi-label">Daily Average</div><div class="kpi-val" id="kDaily">—</div><div class="kpi-sub">deaths per day</div></div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card"><div class="card-head"><div><div class="card-title">Monthly Trend</div><div class="card-sub">Deaths per month</div></div><span class="badge">BAR</span></div><div style="height:190px"><canvas id="cMonthly"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><div class="card-title">Gender Split</div><div class="card-sub">Male vs Female</div></div><span class="badge">DONUT</span></div><div style="height:190px"><canvas id="cGender"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><div class="card-title">Age Distribution</div><div class="card-sub">Deaths by age bracket</div></div><span class="badge">BAR</span></div><div style="height:190px"><canvas id="cAge"></canvas></div></div>
+    </div>
+    <div class="grid-2-1">
+      <div class="card"><div class="card-head"><div><div class="card-title">Top 10 Causes of Death</div><div class="card-sub">By antecedent cause (ICD)</div></div><span class="badge">H-BAR</span></div><div style="height:290px"><canvas id="cCauses"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><div class="card-title">Day of Week</div><div class="card-sub">Deaths by weekday</div></div><span class="badge">POLAR</span></div><div style="height:290px"><canvas id="cDow"></canvas></div></div>
+    </div>
+    <div class="grid-1 card"><div class="card-head"><div><div class="card-title">Daily Death Count</div><div class="card-sub">Day-by-day trend over the entire period</div></div><span class="badge">LINE</span></div><div style="height:170px"><canvas id="cDaily"></canvas></div></div>
+    <div class="grid-2">
+      <div class="card"><div class="card-head"><div><div class="card-title">Gender by Month</div><div class="card-sub">Stacked comparison</div></div><span class="badge">STACKED</span></div><div style="height:210px"><canvas id="cGenderMonth"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><div class="card-title">Age Group × Gender</div><div class="card-sub">Grouped breakdown</div></div><span class="badge">GROUPED</span></div><div style="height:210px"><canvas id="cAgeGender"></canvas></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div class="card-head"><div><div class="card-title">Top Underlying Causes</div><div class="card-sub">Where data available</div></div><span class="badge">PIE</span></div><div style="height:230px"><canvas id="cUnderlying"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><div class="card-title">Cause Category Breakdown</div><div class="card-sub">ICD code system groups</div></div><span class="badge">DONUT</span></div><div style="height:230px"><canvas id="cCatBreak"></canvas></div></div>
+    </div>
+
+    <div class="card">
+      <div class="tbar">
+        <div><div class="card-title">Patient Records</div><div class="card-sub" id="tblInfo">—</div></div>
+        <input class="search" id="srch" type="text" placeholder="🔍  Search name or cause…" oninput="handleSearch()"/>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Name of Deceased</th><th>Date of Death</th><th>Gender</th><th>Age</th><th>Antecedent Cause</th><th>Underlying Cause</th></tr></thead>
+          <tbody id="tblBody"></tbody>
+        </table>
+      </div>
+      <div class="pag">
+        <span id="pagInfo"></span>
+        <div class="pag-btns">
+          <button class="pag-btn" id="btnPrev" onclick="changePage(-1)">← Prev</button>
+          <button class="pag-btn" id="btnNext" onclick="changePage(1)">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer id="footerText">Hospital Death Records Dashboard</footer>
+</div>
+
+<script>
+// ─── PALETTE & GLOBALS ───
+const PAL = ['#4f46e5','#e11d48','#059669','#d97706','#0284c7','#7c3aed','#0891b2','#db2777','#65a30d','#ea580c','#6366f1','#f43f5e','#10b981','#f59e0b','#3b82f6'];
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const aBins = ['0–20','21–40','41–60','61–80','81+'];
+const aKeys = ['0-20','21-40','41-60','61-80','81+'];
+
+let RAW = [], filtered = [], charts = {}, curPage = 1, srchQ = '', searchTimer;
+const PG = 12;
+
+// DOM Cache
+const DOM = {
+  up: document.getElementById('uploadScreen'),
+  ld: document.getElementById('loadingScreen'),
+  db: document.getElementById('dashboardScreen'),
+  drop: document.getElementById('dropZone'),
+  tBody: document.getElementById('tblBody'),
+  fMonth: document.getElementById('fMonth')
+};
+
+// ─── DRAG / DROP ───
+DOM.drop.addEventListener('dragover', e => { e.preventDefault(); DOM.drop.classList.add('over'); });
+DOM.drop.addEventListener('dragleave', () => DOM.drop.classList.remove('over'));
+DOM.drop.addEventListener('drop', e => { e.preventDefault(); DOM.drop.classList.remove('over'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+
+// ─── FILE HANDLER ───
+function handleFile(file) {
+  if (!file) return;
+  DOM.up.style.display = 'none';
+  DOM.ld.style.display = 'flex';
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    setTimeout(() => {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        parseRows(rows, file.name);
+      } catch(err) {
+        alert('Could not read file: ' + err.message);
+        newUpload();
+      }
+    }, 100); // Reduced artificial timeout
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ─── PARSE ───
+function parseRows(rows, filename) {
+  let headerIdx = -1;
+  for (let i = 0; i < Math.min(rows.length, 8); i++) {
+    const r = rows[i].map(c => String(c).trim().toLowerCase());
+    if (r.some(c => c.includes('name of deceased') || c.includes('gender') || c.includes('date of death'))) {
+      headerIdx = i; break;
+    }
+  }
+  if (headerIdx < 0) { alert('Could not detect header row. Please check the file format.'); newUpload(); return; }
+
+  const headers = rows[headerIdx].map(c => String(c).trim());
+  const dataRows = rows.slice(headerIdx + 1).filter(r => r.some(c => c !== ''));
+
+  const ci = keywords => {
+    const kws = keywords.map(k => k.toLowerCase());
+    return headers.findIndex(h => kws.some(k => h.toLowerCase().includes(k)));
+  };
+
+  const COL = {
+    regUnit: ci(['reg unit','reg unit name']), hospital: ci(['hospital']),
+    name: ci(['name of deceased','deceased name','name']), date: ci(['date of death','date']),
+    gender: ci(['gender','sex']), age: ci(['deceased age','age']),
+    immediate: ci(['immediate cause','immediate']), antecedent: ci(['antecedent cause','antecedent']),
+    underlying: ci(['underlying cause','underlying']), other: ci(['other cause','other']),
+  };
+
+  // PRE-PROCESSING: Do heavy lifting (Regex, Dates) ONCE during parsing.
+  RAW = dataRows.map(r => {
+    const obj = {
+      regUnit: COL.regUnit >= 0 ? String(r[COL.regUnit]||'').trim() : '',
+      hospital: COL.hospital >= 0 ? String(r[COL.hospital]||'').trim() : '',
+      name: COL.name >= 0 ? String(r[COL.name]||'').trim() : '',
+      date: COL.date >= 0 ? String(r[COL.date]||'').trim() : '',
+      gender: COL.gender >= 0 ? String(r[COL.gender]||'').trim() : '',
+      age: COL.age >= 0 ? String(r[COL.age]||'').trim() : '',
+      antecedent: COL.antecedent >= 0 ? String(r[COL.antecedent]||'').trim(): '',
+      underlying: COL.underlying >= 0 ? String(r[COL.underlying]||'').trim(): '',
+      immediate: COL.immediate >= 0 ? String(r[COL.immediate]||'').trim() : ''
+    };
+    
+    // Memoize computed values for O(1) read during render
+    obj._date = parseDate(obj.date);
+    obj._month = obj._date ? obj._date.toLocaleString('en-US', {month:'short'}) + ' ' + obj._date.getFullYear() : null;
+    obj._dayOfWeek = obj._date ? obj._date.toLocaleString('en-US',{weekday:'long'}) : null;
+    
+    const ageM = obj.age.match(/(\d+)/);
+    obj._ageNum = ageM ? parseInt(ageM[1]) : null;
+    obj._ageGrp = ageGroup(obj._ageNum);
+    obj._icdCat = icdCategory(obj.antecedent);
+
+    return obj;
+  }).filter(r => r.name || r.date);
+
+  // Build month filter options
+  const monthSet = new Set();
+  RAW.forEach(r => { if(r._month) monthSet.add(r._month); });
+  const months = [...monthSet].sort();
+  months.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; DOM.fMonth.appendChild(o); });
+
+  // Meta update
+  const hosp = RAW.find(r => r.hospital)?.hospital || filename.replace(/\.xlsx?$/i,'');
+  document.getElementById('dbTitle').textContent = hosp.length > 55 ? hosp.slice(0,53)+'…' : hosp;
+  document.getElementById('dbSub').textContent = `${RAW.length} records · ${months[0]||''} – ${months[months.length-1]||''}`;
+  document.getElementById('footerText').textContent = `${hosp} · Death Records Dashboard`;
+
+  filtered = [...RAW];
+  render();
+
+  DOM.ld.style.display = 'none';
+  DOM.db.style.display = 'block';
+}
+
+// ─── HELPERS ───
+function parseDate(str) {
+  if (!str) return null;
+  const m1 = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m1) return new Date(`${m1[3]}-${m1[2].padStart(2,'0')}-${m1[1].padStart(2,'0')}`);
+  const m2 = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m2) return new Date(str);
+  if (/^\d+$/.test(str)) {
+    const d = new Date((parseInt(str) - 25569) * 86400 * 1000);
+    return isNaN(d) ? null : d;
+  }
+  const d = new Date(str);
+  return isNaN(d) ? null : d;
+}
+
+function ageGroup(a) {
+  if (a === null) return null;
+  if (a <= 20) return '0-20'; if (a <= 40) return '21-40';
+  if (a <= 60) return '41-60'; if (a <= 80) return '61-80'; return '81+';
+}
+
+function icdCategory(cause) {
+  if (!cause) return 'Unknown';
+  const m = cause.match(/\(([A-Z]\d+)\)/);
+  if (!m) return 'Unknown';
+  const map = {A:'Infectious',B:'Infectious',C:'Neoplasms',D:'Blood',E:'Endocrine/Metabolic',F:'Mental',G:'Nervous System',H:'Eye/Ear',I:'Circulatory',J:'Respiratory',K:'Digestive',L:'Skin',M:'Musculoskeletal',N:'Genitourinary',O:'Obstetric',P:'Perinatal',Q:'Congenital',R:'Symptoms/Signs',S:'Injury',T:'Poisoning',V:'External',W:'External',X:'External',Y:'External',Z:'Health Status'};
+  return map[m[1][0]] || 'Other';
+}
+
+// ─── FILTERS ───
+function applyFilters() {
+  const m = DOM.fMonth.value, g = document.getElementById('fGender').value, ag = document.getElementById('fAgeGroup').value;
+  filtered = RAW.filter(r => (!m || r._month === m) && (!g || r.gender === g) && (!ag || r._ageGrp === ag));
+  curPage = 1; srchQ = ''; document.getElementById('srch').value = '';
+  render();
+}
+
+function resetAll() {
+  DOM.fMonth.value = ''; document.getElementById('fGender').value = ''; document.getElementById('fAgeGroup').value = '';
+  document.getElementById('srch').value = ''; srchQ = ''; curPage = 1; filtered = [...RAW];
+  render();
+}
+
+function newUpload() {
+  DOM.db.style.display = 'none'; DOM.ld.style.display = 'none'; DOM.up.style.display = 'flex';
+  document.getElementById('fileInput').value = '';
+  RAW = []; filtered = []; Object.values(charts).forEach(c => c.destroy()); charts = {};
+  while (DOM.fMonth.options.length > 1) DOM.fMonth.remove(1);
+}
+
+// ─── RENDER ALL ───
+function render() { updateKPIs(); updateCharts(); renderTable(); }
+
+// ─── KPIs ───
+function updateKPIs() {
+  let male = 0, female = 0, sumAge = 0, validAges = 0;
+  let minDate = Infinity, maxDate = -Infinity;
+
+  // Single pass aggregation for performance
+  filtered.forEach(r => {
+    if (r.gender === 'Male') male++; else if (r.gender === 'Female') female++;
+    if (r._ageNum !== null) { sumAge += r._ageNum; validAges++; }
+    if (r._date) {
+      const ms = r._date.getTime();
+      if (ms < minDate) minDate = ms;
+      if (ms > maxDate) maxDate = ms;
+    }
+  });
+
+  const total = filtered.length;
+  const avgAge = validAges ? (sumAge/validAges).toFixed(1) : '—';
+  let daily = '—';
+  if (minDate !== Infinity && maxDate !== -Infinity) {
+    const span = Math.max(1, Math.round((maxDate - minDate) / 86400000) + 1);
+    daily = (total / span).toFixed(1);
+  }
+
+  document.getElementById('kTotal').textContent = total;
+  document.getElementById('kMale').textContent = male;
+  document.getElementById('kMalePct').textContent = total ? (male/total*100).toFixed(1)+'% of total' : '—';
+  document.getElementById('kFemale').textContent = female;
+  document.getElementById('kFemalePct').textContent = total ? (female/total*100).toFixed(1)+'% of total' : '—';
+  document.getElementById('kAge').textContent = avgAge;
+  document.getElementById('kDaily').textContent = daily;
+}
+
+// ─── CHARTS ───
+function mk(id, cfg) {
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id).getContext('2d'), cfg);
+}
+
+const baseOpts = (stacked=false) => ({
+  responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+  scales:{ y:{beginAtZero:true,stacked,grid:{color:'#f1f5f9'},ticks:{font:{family:'DM Mono',size:10}}}, x:{stacked,grid:{display:false},ticks:{font:{family:'DM Sans',size:11}}} }
+});
+
+function updateCharts() {
+  const d = filtered;
+  
+  // O(N) Maps for frequency counting
+  const freq = { m: {}, age: {}, cause: {}, dow: {}, date: {}, gByM: {m:{},f:{}}, gByA: {m:{},f:{}}, uCause: {}, cat: {} };
+
+  d.forEach(r => {
+    if(r._month) freq.m[r._month] = (freq.m[r._month] || 0) + 1;
+    if(r._ageGrp) freq.age[r._ageGrp] = (freq.age[r._ageGrp] || 0) + 1;
+    if(r.antecedent) freq.cause[r.antecedent] = (freq.cause[r.antecedent] || 0) + 1;
+    if(r._dayOfWeek) freq.dow[r._dayOfWeek] = (freq.dow[r._dayOfWeek] || 0) + 1;
+    if(r._date) { const k = r._date.toISOString().slice(0,10); freq.date[k] = (freq.date[k] || 0) + 1; }
+    if(r._month && r.gender === 'Male') freq.gByM.m[r._month] = (freq.gByM.m[r._month] || 0) + 1;
+    if(r._month && r.gender === 'Female') freq.gByM.f[r._month] = (freq.gByM.f[r._month] || 0) + 1;
+    if(r._ageGrp && r.gender === 'Male') freq.gByA.m[r._ageGrp] = (freq.gByA.m[r._ageGrp] || 0) + 1;
+    if(r._ageGrp && r.gender === 'Female') freq.gByA.f[r._ageGrp] = (freq.gByA.f[r._ageGrp] || 0) + 1;
+    if(r.underlying) freq.uCause[r.underlying] = (freq.uCause[r.underlying] || 0) + 1;
+    if(r._icdCat) freq.cat[r._icdCat] = (freq.cat[r._icdCat] || 0) + 1;
+  });
+
+  const months = Object.keys(freq.m).sort((a,b) => new Date(a) - new Date(b));
+
+  mk('cMonthly',{type:'bar',data:{labels:months,datasets:[{label:'Deaths',data:months.map(m=>freq.m[m]),backgroundColor:PAL.slice(0,months.length).map(c=>c+'cc'),borderRadius:8}]},options:baseOpts()});
+  mk('cGender',{type:'doughnut',data:{labels:['Male','Female'],datasets:[{data:[d.filter(r=>r.gender==='Male').length,d.filter(r=>r.gender==='Female').length],backgroundColor:['#0284c7cc','#e11d48cc'],borderWidth:3,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom'}}}});
+  mk('cAge',{type:'bar',data:{labels:aBins,datasets:[{label:'Deaths',data:aKeys.map(k=>freq.age[k]||0),backgroundColor:PAL.slice(2,7).map(c=>c+'cc'),borderRadius:7}]},options:baseOpts()});
+
+  const top10 = Object.entries(freq.cause).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  mk('cCauses',{type:'bar',data:{labels:top10.map(([k])=>k.length>40?k.slice(0,38)+'…':k),datasets:[{label:'Cases',data:top10.map(([,v])=>v),backgroundColor:PAL.map(c=>c+'cc'),borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#f1f5f9'}},y:{grid:{display:false}}}}});
+  mk('cDow',{type:'polarArea',data:{labels:DAYS,datasets:[{data:DAYS.map(day=>freq.dow[day]||0),backgroundColor:PAL.slice(0,7).map(c=>c+'bb'),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:6}}},scales:{r:{ticks:{display:false},grid:{color:'#f1f5f9'}}}}});
+
+  const dKeys = Object.keys(freq.date).sort();
+  if(dKeys.length) {
+    mk('cDaily',{type:'line',data:{labels:dKeys.map(k=>k.slice(5).replace('-','/')),datasets:[{label:'Deaths',data:dKeys.map(k=>freq.date[k]),borderColor:'#4f46e5',backgroundColor:'rgba(79,70,229,0.07)',borderWidth:2.5,pointRadius:2,fill:true,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false},ticks:{maxTicksLimit:22}}}}});
+  }
+
+  mk('cGenderMonth',{type:'bar',data:{labels:months,datasets:[{label:'Male',data:months.map(m=>freq.gByM.m[m]||0),backgroundColor:'#0284c7cc',borderRadius:5},{label:'Female',data:months.map(m=>freq.gByM.f[m]||0),backgroundColor:'#e11d48cc',borderRadius:5}]},options:{...baseOpts(true),plugins:{legend:{position:'top',display:true}}}});
+  mk('cAgeGender',{type:'bar',data:{labels:aBins,datasets:[{label:'Male',data:aKeys.map(k=>freq.gByA.m[k]||0),backgroundColor:'#0284c7cc',borderRadius:5},{label:'Female',data:aKeys.map(k=>freq.gByA.f[k]||0),backgroundColor:'#e11d48cc',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',display:true}},scales:{y:{beginAtZero:true,grid:{color:'#f1f5f9'}},x:{grid:{display:false}}}}});
+
+  let pData = Object.entries(freq.uCause).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(!pData.length) pData = top10.slice(0,8); // Fallback to antecedent
+  mk('cUnderlying',{type:'pie',data:{labels:pData.map(([k])=>k.length>32?k.slice(0,30)+'…':k),datasets:[{data:pData.map(([,v])=>v),backgroundColor:PAL.map(c=>c+'cc'),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}});
+
+  const cats = Object.entries(freq.cat).sort((a,b)=>b[1]-a[1]);
+  mk('cCatBreak',{type:'doughnut',data:{labels:cats.map(([k])=>k),datasets:[{data:cats.map(([,v])=>v),backgroundColor:PAL.map(c=>c+'cc'),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right'}}}});
+}
+
+// ─── TABLE ───
+function getTableData() {
+  const q = srchQ.toLowerCase();
+  return filtered.filter(r => !q || r.name.toLowerCase().includes(q) || r.antecedent.toLowerCase().includes(q) || r.underlying.toLowerCase().includes(q));
+}
+
+function renderTable() {
+  const data = getTableData();
+  const total = data.length;
+  const pages = Math.max(1, Math.ceil(total/PG));
+  if (curPage > pages) curPage = 1;
+  const start = (curPage-1)*PG;
+  
+  DOM.tBody.innerHTML = data.slice(start, start+PG).map((r,i) => `
+    <tr>
+      <td class="mono" style="color:var(--muted)">${start+i+1}</td>
+      <td style="font-weight:500">${r.name||'—'}</td>
+      <td class="mono">${r.date||'—'}</td>
+      <td><span class="gbadge ${r.gender?.toLowerCase()}">${r.gender||'—'}</span></td>
+      <td class="mono">${r.age||'—'}</td>
+      <td style="color:var(--muted);font-size:12px">${r.antecedent||'—'}</td>
+      <td style="color:var(--muted);font-size:12px">${r.underlying||'—'}</td>
+    </tr>`).join('');
+
+  document.getElementById('tblInfo').textContent = `Showing ${total} record${total!==1?'s':''}`;
+  document.getElementById('pagInfo').textContent = `Page ${curPage} of ${pages} · ${total} records`;
+  document.getElementById('btnPrev').disabled = curPage <= 1;
+  document.getElementById('btnNext').disabled = curPage >= pages;
+}
+
+// Search Debouncing
+function handleSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    srchQ = document.getElementById('srch').value;
+    curPage = 1;
+    renderTable();
+  }, 300);
+}
+
+function changePage(dir) {
+  const pages = Math.max(1, Math.ceil(getTableData().length/PG));
+  curPage = Math.max(1, Math.min(pages, curPage+dir));
+  renderTable();
+}
+</script>
+</body>
+</html>
+</textarea>
+
+<textarea id="app-7" style="display:none;">
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCCD Cause Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #fcfcfd;
+            color: #1a1c1e;
+        }
+
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #f0f1f3;
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .chart-section {
+            background: #ffffff;
+            border: 1px solid #f0f1f3;
+            border-radius: 28px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .custom-button {
+            background: #1a1c1e;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .custom-button:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+        #file-upload { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+            <div>
+                <h1 class="text-4xl font-bold tracking-tight text-slate-900">MCCD Cause <span class="text-blue-600">Dashboard</span></h1>
+                <p class="text-slate-500 mt-2 font-medium">Real-time Death Registration Intelligence Dashboard</p>
+            </div>
+            
+            <div class="flex gap-3">
+                <label for="file-upload" class="custom-button cursor-pointer flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Import Data
+                </label>
+                <input id="file-upload" type="file" accept=".xlsx, .xls" />
+                <button onclick="window.location.reload()" class="bg-slate-100 text-slate-600 p-3 rounded-xl hover:bg-slate-200 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div class="stat-card">
+                <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">Total Deaths</p>
+                <h2 id="kpi-total" class="text-4xl font-bold text-slate-900 mt-2">0</h2>
+                <div class="mt-4 text-xs font-semibold text-blue-500 bg-blue-50 py-1 px-3 rounded-full inline-block">LIVE DATA</div>
+            </div>
+            <div class="stat-card border-l-4 border-l-blue-500">
+                <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">Male Cases</p>
+                <h2 id="kpi-male" class="text-4xl font-bold text-slate-900 mt-2">0</h2>
+            </div>
+            <div class="stat-card border-l-4 border-l-pink-500">
+                <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">Female Cases</p>
+                <h2 id="kpi-female" class="text-4xl font-bold text-slate-900 mt-2">0</h2>
+            </div>
+            <div class="stat-card border-l-4 border-l-indigo-500">
+                <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">Peak Age</p>
+                <h2 id="kpi-age" class="text-4xl font-bold text-slate-900 mt-2">-</h2>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div class="chart-section lg:col-span-2">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="text-xl font-bold text-slate-800">Top 10 Causes of Death</h3>
+                    <span class="text-xs text-slate-400 font-bold uppercase">Horizontal Analysis</span>
+                </div>
+                <div style="height: 500px; position: relative;">
+                    <canvas id="causeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h3 class="text-xl font-bold text-slate-800 mb-8">Gender Distribution</h3>
+                <div style="height: 350px;">
+                    <canvas id="genderChart"></canvas>
+                </div>
+                <div id="gender-legend" class="mt-8 space-y-3">
+                    </div>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <h3 class="text-xl font-bold text-slate-800 mb-8">Demographic Breakdown (By Age Groups)</h3>
+            <div style="height: 400px;">
+                <canvas id="ageChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let charts = {};
+
+        document.getElementById('file-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const workbook = XLSX.read(new Uint8Array(event.target.result), {type: 'array'});
+                const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
+                processData(data);
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function processData(rows) {
+            let stats = { total: 0, male: 0, female: 0, ageData: {}, categories: {} };
+            const ageLabels = ["< 1", "1 TO 4", "5 TO 14", "15 TO 24", "25 TO 34", "35 TO 44", "45 TO 54", "55 To 64", "65 To 69", "70 Above"];
+            
+            ageLabels.forEach(label => stats.ageData[label] = 0);
+
+            rows.forEach((row, index) => {
+                if(index < 2) return; // Skip headers
+
+                const category = (row[0] || "").toString().trim();
+                const gender = (row[1] || "").toString().trim();
+                const total = parseInt(row[13]) || 0;
+
+                if (category && gender !== "Total" && total > 0) {
+                    stats.total += total;
+                    if(gender === "Male") stats.male += total;
+                    if(gender === "Female") stats.female += total;
+
+                    // Group by Categories
+                    stats.categories[category] = (stats.categories[category] || 0) + total;
+
+                    // Age groups (Column 2 to 11)
+                    ageLabels.forEach((label, i) => {
+                        stats.ageData[label] += (parseInt(row[i + 2]) || 0);
+                    });
+                }
+            });
+
+            updateDashboard(stats);
+        }
+
+        function updateDashboard(stats) {
+            document.getElementById('kpi-total').innerText = stats.total.toLocaleString();
+            document.getElementById('kpi-male').innerText = stats.male.toLocaleString();
+            document.getElementById('kpi-female').innerText = stats.female.toLocaleString();
+
+            const peakAge = Object.entries(stats.ageData).sort((a,b) => b[1] - a[1])[0][0];
+            document.getElementById('kpi-age').innerText = peakAge;
+
+            // Render Charts
+            renderCauseChart(stats.categories);
+            renderGenderChart(stats);
+            renderAgeChart(stats.ageData);
+        }
+
+        function renderCauseChart(categories) {
+            const top10 = Object.entries(categories).sort((a,b) => b[1] - a[1]).slice(0, 10);
+            const ctx = document.getElementById('causeChart').getContext('2d');
+            
+            if(charts.cause) charts.cause.destroy();
+            charts.cause = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: top10.map(x => x[0].length > 35 ? x[0].substring(0, 35) + '...' : x[0]),
+                    datasets: [{
+                        label: 'Total Deaths',
+                        data: top10.map(x => x[1]),
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 12,
+                        barThickness: 24,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { ticks: { font: { weight: '600', size: 12 } } }
+                    }
+                }
+            });
+        }
+
+        function renderGenderChart(stats) {
+            const ctx = document.getElementById('genderChart').getContext('2d');
+            if(charts.gender) charts.gender.destroy();
+            charts.gender = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Male', 'Female'],
+                    datasets: [{
+                        data: [stats.male, stats.female],
+                        backgroundColor: ['#3b82f6', '#f472b6'],
+                        borderWidth: 0,
+                        cutout: '80%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function renderAgeChart(ageData) {
+            const ctx = document.getElementById('ageChart').getContext('2d');
+            if(charts.age) charts.age.destroy();
+            charts.age = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(ageData),
+                    datasets: [{
+                        label: 'Age Group Trend',
+                        data: Object.values(ageData),
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointBackgroundColor: '#fff',
+                        pointBorderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+</textarea>
+
+<textarea id="app-8" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Excel Merger</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary: #e2e8f0;
+            --secondary-hover: #cbd5e1;
+            --bg: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 550px;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            text-align: center;
+        }
+
+        .icon-box {
+            width: 64px;
+            height: 64px;
+            background: #eef2ff;
+            color: var(--primary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        h2 { font-size: 24px; font-weight: 800; margin: 0 0 10px; letter-spacing: -0.025em; }
+        p { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; }
+
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            padding: 30px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: #fbfeff;
+        }
+
+        .upload-area:hover { border-color: var(--primary); background: #f5f7ff; }
+
+        #excelInput { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+        .file-list {
+            margin: 20px 0;
+            text-align: left;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 13px;
+        }
+
+        .file-item {
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Button Layout */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        button {
+            flex: 2;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-merge {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-merge:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+
+        .btn-reset {
+            flex: 1;
+            background-color: var(--secondary);
+            color: var(--text-main);
+        }
+
+        .btn-reset:hover { background-color: var(--secondary-hover); }
+
+        button:active { transform: translateY(0); }
+        button:disabled { background-color: #94a3b8; box-shadow: none; cursor: not-allowed; }
+
+        #status { margin-top: 20px; font-size: 14px; font-weight: 500; }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <div class="icon-box">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h8"/><path d="M8 17h8"/><path d="M10 9h1"/></svg>
+        </div>
+        <h2>Merge Excels</h2>
+        <p>Keep the first file's headers and append the rest.</p>
+        
+        <div class="upload-area" id="dropZone">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" style="margin-bottom:10px; color:#94a3b8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <div id="uploadText" style="font-weight:600">Click to upload or drag files</div>
+            <div style="font-size:12px; color:#94a3b8">XLSX, XLS files supported</div>
+            <input type="file" id="excelInput" accept=".xlsx, .xls" multiple>
+        </div>
+
+        <div class="file-list" id="fileList"></div>
+
+        <div class="btn-group">
+            <button id="resetBtn" class="btn-reset">Reset</button>
+            <button id="mergeBtn" class="btn-merge">Merge & Download</button>
+        </div>
+        
+        <div id="status"></div>
+    </div>
+</div>
+
+<script>
+    const input = document.getElementById('excelInput');
+    const fileListContainer = document.getElementById('fileList');
+    const mergeBtn = document.getElementById('mergeBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const status = document.getElementById('status');
+    const uploadText = document.getElementById('uploadText');
+
+    // Display selected files
+    input.addEventListener('change', () => {
+        fileListContainer.innerHTML = '';
+        if (input.files.length > 0) {
+            Array.from(input.files).forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                item.innerHTML = `<span>${file.name}</span> <span style="color:#94a3b8">${(file.size / 1024).toFixed(1)} KB</span>`;
+                fileListContainer.appendChild(item);
+            });
+            uploadText.innerText = `${input.files.length} files selected`;
+        }
+    });
+
+    // Reset Functionality
+    resetBtn.addEventListener('click', () => {
+        input.value = ''; // Clear file input
+        fileListContainer.innerHTML = '';
+        status.innerText = '';
+        uploadText.innerText = 'Click to upload or drag files';
+        mergeBtn.disabled = false;
+    });
+
+    // Merge Functionality
+    mergeBtn.addEventListener('click', async () => {
+        const files = input.files;
+
+        if (files.length < 2) {
+            alert('Please select at least 2 files.');
+            return;
+        }
+
+        status.innerText = "Merging your data...";
+        status.className = "";
+        mergeBtn.disabled = true;
+
+        try {
+            let combinedData = [];
+
+            for (let i = 0; i < files.length; i++) {
+                const data = await files[i].arrayBuffer();
+                const workbook = XLSX.read(data);
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+
+                const options = (i === 0) ? { header: 1 } : { header: 1, range: 1 };
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, options);
+                
+                combinedData = combinedData.concat(jsonData);
+            }
+
+            const newSheet = XLSX.utils.aoa_to_sheet(combinedData);
+            const newWorkbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(newWorkbook, newSheet, "MasterData");
+
+            XLSX.writeFile(newWorkbook, "Merged_Master_File.xlsx");
+            
+            status.innerText = "Done! Download started.";
+            status.className = "success";
+        } catch (e) {
+            status.innerText = "Error processing files.";
+            status.className = "error";
+        } finally {
+            mergeBtn.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>
+</textarea>
 </body>
 </html>
