@@ -836,6 +836,18 @@
 
     header h1 { margin: 0; font-size: 1.75rem; letter-spacing: -0.5px; }
     header p { margin: 0.25rem 0 0; opacity: 0.9; font-size: 0.9rem; }
+    
+    /* New style for hospital name display */
+    #hospitalNameDisplay {
+      margin-top: 15px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 8px 15px;
+      border-radius: 8px;
+      display: inline-block;
+    }
 
     .container-fluid {
       width: 98%;
@@ -913,7 +925,7 @@
       box-shadow: var(--shadow);
       min-height: 450px;
       width: 100%;
-      position: relative; /* Chart.js standard for responsiveness */
+      position: relative; 
     }
 
     #recordCount {
@@ -934,6 +946,8 @@
   <header>
     <h1>Birth Application Analytics Dashboard</h1>
     <p>Complete Administrative Visualization Suite (Chart.js Edition)</p>
+    <!-- Element to display the hospital name -->
+    <div id="hospitalNameDisplay" style="display: none;"></div>
   </header>
 
   <div class="container-fluid">
@@ -1002,6 +1016,18 @@
         allData = json; 
         document.getElementById('recordCount').textContent = `Loaded ${json.length} records`;
         
+        // --- NEW CODE: Extract and display Hospital Name ---
+        const hospitalNameElement = document.getElementById('hospitalNameDisplay');
+        const firstValidRecord = json.find(row => row['Description of Place of birth'] && row['Description of Place of birth'].toString().trim() !== "");
+        
+        if (firstValidRecord) {
+            hospitalNameElement.textContent = "📍 " + firstValidRecord['Description of Place of birth'];
+            hospitalNameElement.style.display = "inline-block";
+        } else {
+            hospitalNameElement.style.display = "none";
+        }
+        // --- END OF NEW CODE ---
+
         document.getElementById('filterSection').style.display = 'flex';
         populateYearFilter(json);
         generateDashboard(json);
@@ -1082,7 +1108,6 @@
       return new Date(NaN);
     }
 
-    // New Chart.js based function
     function addChart(title, labels, values) {
       const chartDiv = document.createElement('div');
       chartDiv.className = 'chart-container';
@@ -1169,7 +1194,6 @@
         return [sortedLabels, sortedLabels.map(l => result[l])];
       };
 
-      // Charts Generation
       const [reportLabels, reportValues] = monthlyCountWithYear(data, 'Reporting Date');
       addChart('Applications by Reporting Date', reportLabels, reportValues);
 
@@ -1254,6 +1278,18 @@
 
     header h1 { margin: 0; font-size: 1.8rem; letter-spacing: -0.5px; }
     header p { margin: 0.3rem 0 0; opacity: 0.9; font-size: 0.95rem; }
+
+    /* New style for hospital/place name display */
+    #hospitalNameDisplay {
+      margin-top: 15px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 8px 15px;
+      border-radius: 8px;
+      display: inline-block;
+    }
 
     /* FULL PAGE VIEW CONTAINER */
     .main-container {
@@ -1360,6 +1396,8 @@
   <header>
     <h1>Death Application Analytics Dashboard</h1>
     <p>Interactive Visualization of Death Registration Data</p>
+    <!-- Element to display the hospital/place name -->
+    <div id="hospitalNameDisplay" style="display: none;"></div>
   </header>
 
   <div class="main-container">
@@ -1434,6 +1472,23 @@
         allData = json; // Store the original data
         document.getElementById('recordCount').textContent = `✓ Loaded ${json.length} records`;
         
+        // --- NEW CODE: Extract and display Hospital/Place Name ---
+        const hospitalNameElement = document.getElementById('hospitalNameDisplay');
+        // Looks for 'Description of Place of death' or 'Description of Place of Death'
+        const firstValidRecord = json.find(row => 
+            (row['Description of Place of death'] && row['Description of Place of death'].toString().trim() !== "") ||
+            (row['Description of Place of Death'] && row['Description of Place of Death'].toString().trim() !== "")
+        );
+        
+        if (firstValidRecord) {
+            const placeName = firstValidRecord['Description of Place of death'] || firstValidRecord['Description of Place of Death'];
+            hospitalNameElement.textContent = "📍 " + placeName;
+            hospitalNameElement.style.display = "inline-block";
+        } else {
+            hospitalNameElement.style.display = "none";
+        }
+        // --- END OF NEW CODE ---
+
         // Show filter section and populate year filter
         document.getElementById('filterSection').style.display = 'flex';
         populateYearFilter(json);
@@ -3602,7 +3657,7 @@ function changePage(dir) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Excel Merger</title>
+    <title>Smart Excel Merger</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -3627,102 +3682,59 @@ function changePage(dir) {
             margin: 0;
         }
 
-        .container {
-            width: 100%;
-            max-width: 550px;
-            padding: 20px;
-        }
+        .container { width: 100%; max-width: 550px; padding: 20px; }
 
         .card {
             background: var(--card-bg);
             padding: 40px;
             border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
         .icon-box {
-            width: 64px;
-            height: 64px;
-            background: #eef2ff;
-            color: var(--primary);
+            width: 64px; height: 64px;
+            background: #eef2ff; color: var(--primary);
             border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             margin: 0 auto 20px;
         }
 
-        h2 { font-size: 24px; font-weight: 800; margin: 0 0 10px; letter-spacing: -0.025em; }
-        p { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; }
+        h2 { font-size: 24px; font-weight: 800; margin: 0 0 10px; }
+        p { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
 
         .upload-area {
             border: 2px dashed #cbd5e1;
-            padding: 30px;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            background: #fbfeff;
+            padding: 30px; border-radius: 16px;
+            cursor: pointer; position: relative;
+            background: #fbfeff; transition: 0.3s;
         }
 
         .upload-area:hover { border-color: var(--primary); background: #f5f7ff; }
 
         #excelInput { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
-        .file-list {
-            margin: 20px 0;
-            text-align: left;
-            max-height: 150px;
-            overflow-y: auto;
-            font-size: 13px;
-        }
+        .file-list { margin: 20px 0; text-align: left; max-height: 150px; overflow-y: auto; font-size: 13px; }
 
         .file-item {
-            background: #f1f5f9;
-            padding: 8px 12px;
-            border-radius: 8px;
-            margin-bottom: 6px;
-            display: flex;
-            justify-content: space-between;
+            background: #f1f5f9; padding: 8px 12px;
+            border-radius: 8px; margin-bottom: 6px;
+            display: flex; justify-content: space-between;
         }
 
-        /* Button Layout */
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 10px;
-        }
+        .btn-group { display: flex; gap: 12px; margin-top: 10px; }
 
         button {
-            flex: 2;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
+            flex: 2; padding: 16px; border: none;
+            border-radius: 12px; font-size: 15px;
+            font-weight: 600; cursor: pointer; transition: 0.2s;
         }
 
-        .btn-merge {
-            background-color: var(--primary);
-            color: white;
-            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
-        }
+        .btn-merge { background-color: var(--primary); color: white; }
+        .btn-merge:hover { background-color: var(--primary-hover); }
 
-        .btn-merge:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
-
-        .btn-reset {
-            flex: 1;
-            background-color: var(--secondary);
-            color: var(--text-main);
-        }
-
+        .btn-reset { flex: 1; background-color: var(--secondary); color: var(--text-main); }
         .btn-reset:hover { background-color: var(--secondary-hover); }
-
-        button:active { transform: translateY(0); }
-        button:disabled { background-color: #94a3b8; box-shadow: none; cursor: not-allowed; }
 
         #status { margin-top: 20px; font-size: 14px; font-weight: 500; }
         .success { color: #10b981; }
@@ -3736,13 +3748,11 @@ function changePage(dir) {
         <div class="icon-box">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h8"/><path d="M8 17h8"/><path d="M10 9h1"/></svg>
         </div>
-        <h2>Merge Excels</h2>
-        <p>Keep the first file's headers and append the rest.</p>
+        <h2>Smart Excel Merger</h2>
+        <p>Auto-detects "INDEX" rows and skips them from 2nd file onwards.</p>
         
-        <div class="upload-area" id="dropZone">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" style="margin-bottom:10px; color:#94a3b8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <div class="upload-area">
             <div id="uploadText" style="font-weight:600">Click to upload or drag files</div>
-            <div style="font-size:12px; color:#94a3b8">XLSX, XLS files supported</div>
             <input type="file" id="excelInput" accept=".xlsx, .xls" multiple>
         </div>
 
@@ -3765,7 +3775,6 @@ function changePage(dir) {
     const status = document.getElementById('status');
     const uploadText = document.getElementById('uploadText');
 
-    // Display selected files
     input.addEventListener('change', () => {
         fileListContainer.innerHTML = '';
         if (input.files.length > 0) {
@@ -3779,55 +3788,57 @@ function changePage(dir) {
         }
     });
 
-    // Reset Functionality
     resetBtn.addEventListener('click', () => {
-        input.value = ''; // Clear file input
+        input.value = '';
         fileListContainer.innerHTML = '';
         status.innerText = '';
         uploadText.innerText = 'Click to upload or drag files';
-        mergeBtn.disabled = false;
     });
 
-    // Merge Functionality
     mergeBtn.addEventListener('click', async () => {
         const files = input.files;
+        if (files.length < 2) { alert('Select at least 2 files.'); return; }
 
-        if (files.length < 2) {
-            alert('Please select at least 2 files.');
-            return;
-        }
-
-        status.innerText = "Merging your data...";
+        status.innerText = "Processing...";
         status.className = "";
-        mergeBtn.disabled = true;
-
+        
         try {
             let combinedData = [];
 
             for (let i = 0; i < files.length; i++) {
                 const data = await files[i].arrayBuffer();
                 const workbook = XLSX.read(data);
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-                const options = (i === 0) ? { header: 1 } : { header: 1, range: 1 };
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet, options);
-                
+                // ডাটা পড়ার আগে চেক করছি প্রথম সেলে "INDEX" আছে কি না
+                const cellA1 = sheet['A1'] ? sheet['A1'].v : '';
+                const isIndexFile = String(cellA1).toUpperCase().includes("INDEX");
+
+                let options;
+                if (i === 0) {
+                    // প্রথম ফাইলের জন্য সব কিছু (Header সহ)
+                    options = { header: 1 };
+                } else {
+                    // পরের ফাইলগুলোর জন্য:
+                    // যদি INDEX থাকে তবে ৩ নম্বর রো থেকে শুরু (range: 2)
+                    // না থাকলে ২ নম্বর রো থেকে শুরু (range: 1)
+                    options = { header: 1, range: isIndexFile ? 2 : 1 };
+                }
+
+                const jsonData = XLSX.utils.sheet_to_json(sheet, options);
                 combinedData = combinedData.concat(jsonData);
             }
 
             const newSheet = XLSX.utils.aoa_to_sheet(combinedData);
             const newWorkbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(newWorkbook, newSheet, "MasterData");
-
-            XLSX.writeFile(newWorkbook, "Merged_Master_File.xlsx");
+            XLSX.utils.book_append_sheet(newWorkbook, newSheet, "MergedData");
+            XLSX.writeFile(newWorkbook, "Smart_Merged_File.xlsx");
             
-            status.innerText = "Done! Download started.";
+            status.innerText = "Merged successfully!";
             status.className = "success";
         } catch (e) {
-            status.innerText = "Error processing files.";
+            status.innerText = "Error: " + e.message;
             status.className = "error";
-        } finally {
-            mergeBtn.disabled = false;
         }
     });
 </script>
