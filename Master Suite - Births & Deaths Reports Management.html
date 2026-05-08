@@ -836,18 +836,6 @@
 
     header h1 { margin: 0; font-size: 1.75rem; letter-spacing: -0.5px; }
     header p { margin: 0.25rem 0 0; opacity: 0.9; font-size: 0.9rem; }
-    
-    /* New style for hospital name display */
-    #hospitalNameDisplay {
-      margin-top: 15px;
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: #fff;
-      background: rgba(0, 0, 0, 0.15);
-      padding: 8px 15px;
-      border-radius: 8px;
-      display: inline-block;
-    }
 
     .container-fluid {
       width: 98%;
@@ -925,7 +913,7 @@
       box-shadow: var(--shadow);
       min-height: 450px;
       width: 100%;
-      position: relative; 
+      position: relative; /* Chart.js standard for responsiveness */
     }
 
     #recordCount {
@@ -946,8 +934,6 @@
   <header>
     <h1>Birth Application Analytics Dashboard</h1>
     <p>Complete Administrative Visualization Suite (Chart.js Edition)</p>
-    <!-- Element to display the hospital name -->
-    <div id="hospitalNameDisplay" style="display: none;"></div>
   </header>
 
   <div class="container-fluid">
@@ -1016,18 +1002,6 @@
         allData = json; 
         document.getElementById('recordCount').textContent = `Loaded ${json.length} records`;
         
-        // --- NEW CODE: Extract and display Hospital Name ---
-        const hospitalNameElement = document.getElementById('hospitalNameDisplay');
-        const firstValidRecord = json.find(row => row['Description of Place of birth'] && row['Description of Place of birth'].toString().trim() !== "");
-        
-        if (firstValidRecord) {
-            hospitalNameElement.textContent = "📍 " + firstValidRecord['Description of Place of birth'];
-            hospitalNameElement.style.display = "inline-block";
-        } else {
-            hospitalNameElement.style.display = "none";
-        }
-        // --- END OF NEW CODE ---
-
         document.getElementById('filterSection').style.display = 'flex';
         populateYearFilter(json);
         generateDashboard(json);
@@ -1108,6 +1082,7 @@
       return new Date(NaN);
     }
 
+    // New Chart.js based function
     function addChart(title, labels, values) {
       const chartDiv = document.createElement('div');
       chartDiv.className = 'chart-container';
@@ -1194,15 +1169,21 @@
         return [sortedLabels, sortedLabels.map(l => result[l])];
       };
 
+      // Charts Generation
       const [reportLabels, reportValues] = monthlyCountWithYear(data, 'Reporting Date');
       addChart('Applications by Reporting Date', reportLabels, reportValues);
 
       const [dobLabels, dobValues] = monthlyCountWithYear(data, 'Date Of Birth');
       addChart('Applications by Date of Birth', dobLabels, dobValues);
 
+      // --- MODIFIED SECTION ---
+      // Filter out 'Still Birth' records specifically for the Time Gap Distribution
+      const timeGapData = data.filter(item => item['Appl Type'] !== 'Still Birth');
+      
       const timeGapBuckets = [[0, 3], [3, 8], [8, 22], [22, 31], [31, 366], [366, null]];
       const timeGapLabels = ['0-2 days', '3-7 days', '8-21 days', '22-30 days', '31-365 days', '365+ days'];
-      addChart('Time Gap Distribution', timeGapLabels, bucketBy(data, 'Time Gap', timeGapBuckets));
+      addChart('Time Gap Distribution', timeGapLabels, bucketBy(timeGapData, 'Time Gap', timeGapBuckets));
+      // ------------------------
 
       const firstNameMissing = data.filter(d => !d['First Name'] && d['Appl Type'] !== 'Still Birth').length;
       addChart('Missing First Names (Excl. Still Birth)', ['Missing', 'Present'], [firstNameMissing, data.length - firstNameMissing]);
@@ -1278,18 +1259,6 @@
 
     header h1 { margin: 0; font-size: 1.8rem; letter-spacing: -0.5px; }
     header p { margin: 0.3rem 0 0; opacity: 0.9; font-size: 0.95rem; }
-
-    /* New style for hospital/place name display */
-    #hospitalNameDisplay {
-      margin-top: 15px;
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: #fff;
-      background: rgba(0, 0, 0, 0.15);
-      padding: 8px 15px;
-      border-radius: 8px;
-      display: inline-block;
-    }
 
     /* FULL PAGE VIEW CONTAINER */
     .main-container {
@@ -1396,8 +1365,6 @@
   <header>
     <h1>Death Application Analytics Dashboard</h1>
     <p>Interactive Visualization of Death Registration Data</p>
-    <!-- Element to display the hospital/place name -->
-    <div id="hospitalNameDisplay" style="display: none;"></div>
   </header>
 
   <div class="main-container">
@@ -1472,23 +1439,6 @@
         allData = json; // Store the original data
         document.getElementById('recordCount').textContent = `✓ Loaded ${json.length} records`;
         
-        // --- NEW CODE: Extract and display Hospital/Place Name ---
-        const hospitalNameElement = document.getElementById('hospitalNameDisplay');
-        // Looks for 'Description of Place of death' or 'Description of Place of Death'
-        const firstValidRecord = json.find(row => 
-            (row['Description of Place of death'] && row['Description of Place of death'].toString().trim() !== "") ||
-            (row['Description of Place of Death'] && row['Description of Place of Death'].toString().trim() !== "")
-        );
-        
-        if (firstValidRecord) {
-            const placeName = firstValidRecord['Description of Place of death'] || firstValidRecord['Description of Place of Death'];
-            hospitalNameElement.textContent = "📍 " + placeName;
-            hospitalNameElement.style.display = "inline-block";
-        } else {
-            hospitalNameElement.style.display = "none";
-        }
-        // --- END OF NEW CODE ---
-
         // Show filter section and populate year filter
         document.getElementById('filterSection').style.display = 'flex';
         populateYearFilter(json);
