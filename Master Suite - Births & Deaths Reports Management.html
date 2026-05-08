@@ -142,6 +142,12 @@
             <div class="nav-item" onclick="loadApp(4, this)">
                 <i class="fas fa-file-export"></i> <span>Death Report Gen</span>
             </div>
+            <div class="nav-item" onclick="loadApp(10, this)">
+                <i class="fas fa-file-export"></i> <span>Time Gap Report Gen - Live Birth</span>
+            </div>
+            <div class="nav-item" onclick="loadApp(11, this)">
+                <i class="fas fa-file-export"></i> <span>Time Gap Report Gen - Death</span>
+            </div>			
 			<div class="nav-item" onclick="loadApp(6, this)">
                 <i class="fas fa-file-export"></i> <span>MCCD Dashboard</span>
             </div>
@@ -2308,6 +2314,870 @@
         generateBtn.disabled = false;
         spinner.style.display = 'none';
         generateBtn.textContent = 'Generate Death Report.xlsx';
+      }
+    }
+  </script>
+</body>
+</html>
+</textarea>
+
+<textarea id="app-10" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time Gap Report Gen - Live Birth</title>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --secondary: #3f37c9;
+      --dark: #1b263b;
+      --light: #f8f9fa;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f0f2f5;
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: white;
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 25px;
+      font-weight: 600;
+      font-size: 26px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+
+    input[type="date"], select, input[type="file"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 15px;
+      background-color: #fff;
+    }
+
+    input[type="date"]:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+
+    .exclusion-box {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+
+    .checkbox-group {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      font-weight: normal;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .checkbox-group input {
+      width: auto;
+      margin-right: 8px;
+      transform: scale(1.2);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      font-size: 100px;
+      opacity: 0;
+      right: 0;
+      top: 0;
+    }
+
+    .file-input-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 15px;
+      background: #f8f9fa;
+      border: 1px dashed #ccc;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+    }
+
+    .file-input-button {
+      background: var(--primary-light);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button.generate-btn {
+      width: 100%;
+      padding: 15px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    button.generate-btn:hover { background-color: #1b5e20; }
+    button.generate-btn:disabled { background-color: #9e9e9e; cursor: not-allowed; }
+
+    .file-list {
+      margin-top: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: var(--border-radius);
+      padding: 10px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📊 Accurate Time Gap Report</h2>
+    
+    <div style="display: flex; gap: 20px;">
+      <div class="form-group" style="flex: 1;">
+        <label for="fromDate">From Date (Date of Birth)</label>
+        <input type="date" id="fromDate">
+      </div>
+      <div class="form-group" style="flex: 1;">
+        <label for="toDate">To Date (Date of Birth)</label>
+        <input type="date" id="toDate">
+      </div>
+    </div>
+    
+    <div class="form-group exclusion-box">
+      <label>Data Exclusion Rules (Uncheck to include in report):</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="exclStillBirth" checked> Exclude Still Births</label>
+        <label><input type="checkbox" id="exclRejected" checked> Exclude Rejected Applications</label>
+        <label><input type="checkbox" id="exclCitizen" checked> Exclude Citizen Pending</label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>Upload Excel Files (Each file = 1 Hospital)</label>
+      <div class="file-input-wrapper">
+        <label class="file-input-label" for="fileInput">
+          <span id="fileInputText">Choose files...</span>
+          <span class="file-input-button">Browse</span>
+        </label>
+        <input type="file" id="fileInput" accept=".xlsx, .xls" multiple>
+      </div>
+      <div class="file-list" id="fileList"></div>
+    </div>
+    
+    <button class="generate-btn" onclick="processFiles()" id="generateBtn">
+      <span class="spinner" id="spinner"></span>
+      Download Excel Report
+    </button>
+  </div>
+
+  <script>
+    document.getElementById('fileInput').addEventListener('change', function() {
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+      if (this.files.length === 0) {
+        document.getElementById('fileInputText').textContent = 'Choose files...';
+        return;
+      }
+      document.getElementById('fileInputText').textContent = `${this.files.length} file(s) selected`;
+      Array.from(this.files).forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `📄 &nbsp; ${index + 1}. ${file.name}`;
+        fileList.appendChild(fileItem);
+      });
+    });
+
+    function findColumnIndex(headers, possibleNames) {
+      if (!headers) return -1;
+      // First pass: Exact match
+      for (const name of possibleNames) {
+        const index = headers.findIndex(h => h && h.toString().toLowerCase().trim() === name.toLowerCase());
+        if (index !== -1) return index;
+      }
+      // Second pass: Partial match
+      for (const name of possibleNames) {
+        const index = headers.findIndex(h => h && h.toString().toLowerCase().includes(name.toLowerCase()));
+        if (index !== -1) return index;
+      }
+      return -1;
+    }
+
+    // Robust Date Parser for Indian DD/MM/YYYY formats
+    function parseDate(value) {
+      if (value === undefined || value === null || value === '') return null;
+      if (typeof value === 'number') {
+        const parsed = XLSX.SSF.parse_date_code(value);
+        return parsed ? new Date(parsed.y, parsed.m - 1, parsed.d) : null;
+      }
+      if (typeof value === 'string') {
+        let strVal = value.trim().split(/[\sT]+/)[0]; 
+        let match = strVal.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (match) return new Date(match[3], match[2] - 1, match[1]); // DD/MM/YYYY
+        
+        match = strVal.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+        if (match) return new Date(match[1], match[2] - 1, match[3]); // YYYY/MM/DD
+        
+        const d = new Date(value);
+        if (!isNaN(d.getTime())) return d;
+      }
+      return null;
+    }
+
+    async function processFiles() {
+      const fromDateVal = document.getElementById('fromDate').value;
+      const toDateVal = document.getElementById('toDate').value;
+      const files = document.getElementById('fileInput').files;
+      
+      const exclStillBirth = document.getElementById('exclStillBirth').checked;
+      const exclRejected = document.getElementById('exclRejected').checked;
+      const exclCitizen = document.getElementById('exclCitizen').checked;
+
+      if (!fromDateVal || !toDateVal) { alert("Please select both dates."); return; }
+      if (files.length === 0) { alert("Please upload at least one Excel file."); return; }
+
+      const fromDate = new Date(fromDateVal);
+      const toDate = new Date(toDateVal);
+      if (fromDate > toDate) { alert("From Date cannot be after To Date."); return; }
+
+      const generateBtn = document.getElementById('generateBtn');
+      const spinner = document.getElementById('spinner');
+      
+      generateBtn.disabled = true;
+      spinner.style.display = 'block';
+      generateBtn.innerHTML = '<span class="spinner" style="display:block"></span> Processing...';
+
+      let reportData = [];
+      let sl = 1;
+
+      try {
+        for (const file of files) {
+          try {
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data);
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            
+            const headers = jsonData[0] ? jsonData[0].map(h => h ? h.toString().toLowerCase().trim() : '') : [];
+            
+            const dobColIndex = findColumnIndex(headers, ['date of birth', 'dob', 'birth date']);
+            const timeGapColIndex = findColumnIndex(headers, ['time gap']);
+            const applTypeColIndex = findColumnIndex(headers, ['appl type', 'application type']);
+            const statusColIndex = findColumnIndex(headers, ['status', 'application status']);
+            const roleColIndex = findColumnIndex(headers, ['data entered by', 'role', 'entered by']);
+
+            // FORCE Target Column to always be Date of Birth
+            const targetDateColIndex = dobColIndex;
+
+            if (targetDateColIndex === -1) {
+              console.warn(`Missing 'Date of Birth' column in ${file.name}`);
+              continue;
+            }
+
+            let counts = { '0-2': 0, '3-7': 0, '8-21': 0, '22-30': 0, '31-365': 0, 'total': 0 };
+
+            for (let i = 1; i < jsonData.length; i++) {
+              const row = jsonData[i];
+              if (!row || row[targetDateColIndex] === undefined || row[targetDateColIndex] === null) continue;
+
+              // --- FILTERS ---
+              if (exclStillBirth && applTypeColIndex !== -1) {
+                const type = String(row[applTypeColIndex] || '').toLowerCase().trim();
+                if (type === 'still birth' || type === 'stillbirth') continue;
+              }
+
+              const status = statusColIndex !== -1 ? String(row[statusColIndex] || '').toLowerCase().trim() : '';
+              const role = roleColIndex !== -1 ? String(row[roleColIndex] || '').toLowerCase().trim() : '';
+
+              if (exclRejected && status === 'rejected') continue;
+              if (exclCitizen && role === 'citizen' && (status === 'application submitted' || status === 'rejected')) continue;
+
+              // --- DATE MATCHING ---
+              const dateVal = parseDate(row[targetDateColIndex]);
+              if (dateVal && !isNaN(dateVal.getTime())) {
+                const compareDate = new Date(dateVal.getFullYear(), dateVal.getMonth(), dateVal.getDate());
+                const fromCompare = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+                const toCompare = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate() + 1); // Inclusive of ToDate
+
+                if (compareDate >= fromCompare && compareDate < toCompare) {
+                  
+                  // --- STRICT TIME GAP CALCULATION (Skips Blanks) ---
+                  let timeGap = NaN;
+                  if (timeGapColIndex !== -1) {
+                    let tgVal = row[timeGapColIndex];
+                    if (tgVal !== "" && tgVal !== null && tgVal !== undefined) {
+                      const parsedGap = parseInt(tgVal, 10);
+                      if (!isNaN(parsedGap)) {
+                        timeGap = parsedGap;
+                      }
+                    }
+                  }
+
+                  if (!isNaN(timeGap) && timeGap >= 0) {
+                    if (timeGap >= 0 && timeGap <= 2) counts['0-2']++;
+                    else if (timeGap >= 3 && timeGap <= 7) counts['3-7']++;
+                    else if (timeGap >= 8 && timeGap <= 21) counts['8-21']++;
+                    else if (timeGap >= 22 && timeGap <= 30) counts['22-30']++;
+                    else if (timeGap >= 31 && timeGap <= 365) counts['31-365']++;
+                  }
+                }
+              }
+            }
+
+            counts['total'] = counts['0-2'] + counts['3-7'] + counts['8-21'] + counts['22-30'] + counts['31-365'];
+
+            reportData.push([
+              sl++,
+              file.name.replace(/\.[^/.]+$/, ""), 
+              counts['0-2'], counts['3-7'], counts['8-21'], counts['22-30'], counts['31-365'], counts['total']
+            ]);
+
+          } catch (error) {
+            console.error(`Error in ${file.name}:`, error);
+          }
+        }
+
+        const excelDataArray = [
+          ["Actual Live Birth", "", "Time Gap Distribution of Birth Application", "", "", "", "", ""],
+          ["SL No.", "Hospital Name", "0-2 Days", "3-7 Days", "8-21 Days", "22-30 Days", "31-365 Days", "Total"],
+          ...reportData
+        ];
+
+        const ws = XLSX.utils.aoa_to_sheet(excelDataArray);
+        ws['!merges'] = [
+          { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }, 
+          { s: { r: 0, c: 2 }, e: { r: 0, c: 7 } }  
+        ];
+
+        ws['!cols'] = [
+          { wch: 8 }, { wch: 30 }, { wch: 12 }, { wch: 12 }, 
+          { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 10 }
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Time Gap Report");
+        XLSX.writeFile(wb, "Accurate_Time_Gap_Report.xlsx");
+
+      } catch (error) {
+        alert('An error occurred. Please check the files and try again.');
+      } finally {
+        generateBtn.disabled = false;
+        spinner.style.display = 'none';
+        generateBtn.innerHTML = 'Download Excel Report';
+      }
+    }
+  </script>
+</body>
+</html>
+</textarea>
+
+<textarea id="app-11" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time Gap Report Gen - Death</title>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #dc3545; /* Changed to Red for Death Report */
+      --primary-light: #e4606d;
+      --dark: #1b263b;
+      --light: #f8f9fa;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f0f2f5;
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: white;
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 25px;
+      font-weight: 600;
+      font-size: 26px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--dark);
+      font-size: 14px;
+    }
+
+    input[type="date"], select, input[type="file"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 15px;
+      background-color: #fff;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    input[type="date"]:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+    }
+
+    .exclusion-box {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+
+    .checkbox-group {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      font-weight: normal;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .checkbox-group input {
+      width: auto;
+      margin-right: 8px;
+      transform: scale(1.2);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      font-size: 100px;
+      opacity: 0;
+      right: 0;
+      top: 0;
+      cursor: pointer;
+    }
+
+    .file-input-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 15px;
+      background: #f8f9fa;
+      border: 1px dashed #ccc;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+    }
+
+    .file-input-button {
+      background: var(--primary-light);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    button.generate-btn {
+      width: 100%;
+      padding: 15px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: var(--transition);
+      font-family: 'Poppins', sans-serif;
+    }
+
+    button.generate-btn:hover { background-color: #bd2130; }
+    button.generate-btn:disabled { background-color: #e9ecef; color: #6c757d; cursor: not-allowed; }
+
+    .file-list {
+      margin-top: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: var(--border-radius);
+      padding: 10px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    .status { margin-top: 15px; text-align: center; font-weight: 600; color: #28a745; font-size: 14px; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📊 Accurate Time Gap Report (Death)</h2>
+    
+    <div style="display: flex; gap: 20px;">
+      <div class="form-group" style="flex: 1;">
+        <label for="fromDate">From Date (Date of Death)</label>
+        <input type="date" id="fromDate">
+      </div>
+      <div class="form-group" style="flex: 1;">
+        <label for="toDate">To Date (Date of Death)</label>
+        <input type="date" id="toDate">
+      </div>
+    </div>
+    
+    <div class="form-group exclusion-box">
+      <label>Data Exclusion Rules (Uncheck to include in report):</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="exclRejected" checked> Exclude Rejected Applications</label>
+        <label><input type="checkbox" id="exclCitizen" checked> Exclude Citizen Pending</label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>Upload Excel Files (Each file = 1 Hospital)</label>
+      <div class="file-input-wrapper">
+        <label class="file-input-label" for="fileInput">
+          <span id="fileInputText">Choose files...</span>
+          <span class="file-input-button">Browse</span>
+        </label>
+        <input type="file" id="fileInput" accept=".xlsx, .xls" multiple>
+      </div>
+      <div class="file-list" id="fileList"></div>
+    </div>
+    
+    <button class="generate-btn" onclick="processFiles()" id="generateBtn">
+      <span class="spinner" id="spinner"></span>
+      Download Exact Death Report.xlsx
+    </button>
+    <div id="statusMessage" class="status"></div>
+  </div>
+
+  <script>
+    // Custom File Input UI logic
+    document.getElementById('fileInput').addEventListener('change', function() {
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+      if (this.files.length === 0) {
+        document.getElementById('fileInputText').textContent = 'Choose files...';
+        return;
+      }
+      document.getElementById('fileInputText').textContent = `${this.files.length} file(s) selected`;
+      Array.from(this.files).forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `📄 &nbsp; ${index + 1}. ${file.name}`;
+        fileList.appendChild(fileItem);
+      });
+    });
+
+    // Accurate Column Finder
+    function findColumnIndex(headers, possibleNames) {
+      if (!headers) return -1;
+      for (const name of possibleNames) {
+        const index = headers.findIndex(h => h && h.toString().toLowerCase().trim() === name.toLowerCase());
+        if (index !== -1) return index;
+      }
+      for (const name of possibleNames) {
+        const index = headers.findIndex(h => h && h.toString().toLowerCase().includes(name.toLowerCase()));
+        if (index !== -1) return index;
+      }
+      return -1;
+    }
+
+    // Robust Excel Date Parser
+    function parseExcelDate(value) {
+      if (value === null || value === undefined || value === "") return null;
+      
+      if (value instanceof Date) {
+        return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+      }
+      
+      if (typeof value === 'number') {
+        const parsed = XLSX.SSF.parse_date_code(value);
+        return parsed ? new Date(parsed.y, parsed.m - 1, parsed.d) : null;
+      }
+      
+      if (typeof value === 'string') {
+        const cleanStr = value.trim().split(/[\sT]+/)[0]; 
+        
+        let match = cleanStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (match) return new Date(match[3], match[2] - 1, match[1]); 
+        
+        match = cleanStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+        if (match) return new Date(match[1], match[2] - 1, match[3]); 
+        
+        const d = new Date(value);
+        if (!isNaN(d.getTime())) {
+          return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        }
+      }
+      return null;
+    }
+
+    async function processFiles() {
+      const fromDateVal = document.getElementById('fromDate').value;
+      const toDateVal = document.getElementById('toDate').value;
+      const files = document.getElementById('fileInput').files;
+      
+      const exclRejected = document.getElementById('exclRejected').checked;
+      const exclCitizen = document.getElementById('exclCitizen').checked;
+
+      if (!fromDateVal || !toDateVal) { alert("Please select both dates."); return; }
+      if (files.length === 0) { alert("Please upload at least one Excel file."); return; }
+
+      // Fix Timezone shift
+      const [fY, fM, fD] = fromDateVal.split('-').map(Number);
+      const fromCompareTime = new Date(fY, fM - 1, fD).getTime();
+
+      const [tY, tM, tD] = toDateVal.split('-').map(Number);
+      const toCompareTime = new Date(tY, tM - 1, tD).getTime();
+
+      if (fromCompareTime > toCompareTime) { alert("From Date cannot be after To Date."); return; }
+
+      const generateBtn = document.getElementById('generateBtn');
+      const spinner = document.getElementById('spinner');
+      const statusMsg = document.getElementById('statusMessage');
+      
+      generateBtn.disabled = true;
+      spinner.style.display = 'block';
+      generateBtn.childNodes[2].nodeValue = ' Processing Data...';
+      statusMsg.innerText = "";
+
+      let reportData = [];
+      let sl = 1;
+
+      try {
+        for (const file of files) {
+          try {
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data, { cellDates: true });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+            const headers = jsonData[0] ? jsonData[0].map(h => h ? h.toString().toLowerCase().trim() : '') : [];
+            
+            const dodColIndex = findColumnIndex(headers, ['date of death', 'dod', 'death date']);
+            const timeGapColIndex = findColumnIndex(headers, ['time gap']);
+            const statusColIndex = findColumnIndex(headers, ['status', 'application status']);
+            const roleColIndex = findColumnIndex(headers, ['data entered by', 'role', 'entered by']);
+
+            if (dodColIndex === -1) {
+              console.warn(`Missing 'Date of Death' column in ${file.name}`);
+              continue;
+            }
+
+            let counts = { '0-2': 0, '3-7': 0, '8-21': 0, '22-30': 0, '31-365': 0, 'total': 0 };
+
+            for (let i = 1; i < jsonData.length; i++) {
+              const row = jsonData[i];
+              if (!row || row.length === 0) continue;
+
+              const dodDate = parseExcelDate(row[dodColIndex]);
+              if (!dodDate) continue;
+
+              const rowTime = dodDate.getTime();
+
+              if (rowTime >= fromCompareTime && rowTime <= toCompareTime) {
+                
+                // --- FILTERS ---
+                const status = statusColIndex !== -1 ? String(row[statusColIndex] || '').toLowerCase().trim() : '';
+                const role = roleColIndex !== -1 ? String(row[roleColIndex] || '').toLowerCase().trim() : '';
+
+                if (exclRejected && status === 'rejected') continue;
+                if (exclCitizen && role === 'citizen' && (status === 'application submitted' || status === 'rejected')) continue;
+
+                // --- STRICT TIME GAP CALCULATION (Skips Blanks) ---
+                let timeGap = NaN;
+                if (timeGapColIndex !== -1) {
+                  let tgVal = row[timeGapColIndex];
+                  if (tgVal !== "" && tgVal !== null && tgVal !== undefined) {
+                    const parsedGap = parseInt(tgVal, 10);
+                    if (!isNaN(parsedGap)) {
+                      timeGap = parsedGap;
+                    }
+                  }
+                }
+
+                if (!isNaN(timeGap) && timeGap >= 0) {
+                  if (timeGap >= 0 && timeGap <= 2) counts['0-2']++;
+                  else if (timeGap >= 3 && timeGap <= 7) counts['3-7']++;
+                  else if (timeGap >= 8 && timeGap <= 21) counts['8-21']++;
+                  else if (timeGap >= 22 && timeGap <= 30) counts['22-30']++;
+                  else if (timeGap >= 31 && timeGap <= 365) counts['31-365']++;
+                }
+              }
+            }
+
+            counts['total'] = counts['0-2'] + counts['3-7'] + counts['8-21'] + counts['22-30'] + counts['31-365'];
+
+            reportData.push([
+              sl++,
+              file.name.replace(/\.[^/.]+$/, ""), 
+              counts['0-2'], counts['3-7'], counts['8-21'], counts['22-30'], counts['31-365'], counts['total']
+            ]);
+
+          } catch (error) {
+            console.error(`Error in ${file.name}:`, error);
+          }
+        }
+
+        const excelDataArray = [
+          ["Actual Deaths", "", "Time Gap Distribution of Death Application", "", "", "", "", ""],
+          ["SL No.", "Hospital Name", "0-2 Days", "3-7 Days", "8-21 Days", "22-30 Days", "31-365 Days", "Total"],
+          ...reportData
+        ];
+
+        const ws = XLSX.utils.aoa_to_sheet(excelDataArray);
+        ws['!merges'] = [
+          { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }, 
+          { s: { r: 0, c: 2 }, e: { r: 0, c: 7 } }  
+        ];
+
+        ws['!cols'] = [
+          { wch: 8 }, { wch: 30 }, { wch: 12 }, { wch: 12 }, 
+          { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 10 }
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Time Gap Report (Death)");
+        XLSX.writeFile(wb, "Accurate_Death_Time_Gap_Report.xlsx");
+        
+        statusMsg.innerText = "✅ Death Report Downloaded Successfully!";
+
+      } catch (error) {
+        alert('An error occurred. Please check the files and try again.');
+      } finally {
+        generateBtn.disabled = false;
+        spinner.style.display = 'none';
+        generateBtn.childNodes[2].nodeValue = ' Download Exact Death Report.xlsx';
       }
     }
   </script>
